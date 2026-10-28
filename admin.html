@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin · Diagnóstico BIM Pacaembu</title>
+<script src="config.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600&display=swap">
+<style>
+/* Layout: faixa de marca no topo, abas por questionário, formulário em coluna única de leitura (~720px) */
+:root{
+  --navy:#003D4C; --red:#E4002B; --yellow:#FFB81C;
+  --bg:#FFFFFF; --surface:#FFFFFF; --field:#F6F9FA; --hdr:#FFFFFF; --hdr-fg:#003D4C; --logo-bg:transparent; --surface-2:#EAF0F1; --line:#D3DEE1;
+  --fg:#14262B; --muted:#56707A; --accent:#003D4C; --accent-fg:#FFFFFF;
+  --chip:#E1EBED; --ok:#1E6B34; --ok-bg:#E3F1E6; --warn-bg:#FFF4D6;
+  --focus:#E4002B;
+  --display:"Montserrat",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+:root{color-scheme:light}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.brand{background:var(--hdr);color:var(--hdr-fg)}
+header.brand .wrap{padding-block:28px 22px;display:flex;flex-direction:column;gap:14px}
+.logo{background:var(--logo-bg);border-radius:8px;padding:8px 10px 8px 0;align-self:flex-start;display:flex}
+.logo img{height:40px;max-width:100%;width:auto;display:block}
+header h1{font-family:var(--display);font-weight:800;font-size:clamp(22px,4vw,30px);line-height:1.15;margin:0;text-wrap:balance;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted);max-width:62ch}
+.stripe{height:6px;display:grid;grid-template-columns:70% 2% 28%}
+.stripe i:nth-child(1){background:var(--navy)}
+.stripe i:nth-child(2){background:var(--yellow)}
+.stripe i:nth-child(3){background:var(--red)}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--hdr)}
+nav.tabs .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav.tabs a{font-family:var(--display);font-weight:600;font-size:13px;color:var(--muted);text-decoration:none;padding:14px 12px 12px;border-bottom:3px solid transparent;white-space:nowrap;display:flex;gap:8px;align-items:center}
+nav.tabs a[aria-current="page"]{color:var(--fg);border-bottom-color:var(--red)}
+nav.tabs a .n{font-variant-numeric:tabular-nums;font-size:11px;background:var(--chip);color:var(--fg);border-radius:10px;padding:1px 7px}
+nav.tabs a .done{color:var(--ok)}
+main .wrap{padding-block:28px 64px;display:flex;flex-direction:column;gap:22px}
+.intro{display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--red)}
+h2{font-family:var(--display);font-weight:700;font-size:24px;margin:0;line-height:1.2;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:8px;color:var(--muted);font-size:14px}
+.meta span{background:var(--chip);border-radius:4px;padding:2px 8px}
+fieldset{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:18px}
+.section{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:18px}
+.section h3{font-family:var(--display);font-size:15px;font-weight:700;margin:0;color:var(--accent);display:flex;gap:10px;align-items:baseline}
+.section h3 small{font-family:var(--body);font-weight:400;color:var(--muted);font-size:13px}
+.q{display:flex;flex-direction:column;gap:8px}
+.q>label,.q>.lbl{font-weight:600}
+.q .hint{color:var(--muted);font-size:14px;margin-top:-4px}
+.req{color:var(--red)}
+input[type=text],input[type=email],input[type=number],select,textarea{font:inherit;color:var(--fg);background:var(--field);border:1px solid var(--line);border-radius:6px;padding:10px 12px;width:100%}
+textarea{min-height:92px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,.opt input:focus-visible+span,.scale input:focus-visible+span,a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{position:relative}
+.opt input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.opt span{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 14px;background:var(--field);font-size:15px;cursor:pointer}
+.opt input:checked+span{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.scale label{position:relative}
+.scale input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.scale span{display:flex;align-items:center;justify-content:center;height:40px;border:1px solid var(--line);border-radius:6px;background:var(--field);font-family:var(--display);font-weight:700;font-variant-numeric:tabular-nums;cursor:pointer}
+.scale input:checked+span{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.scale-ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+button{font-family:var(--display);font-weight:700;font-size:14px;border-radius:6px;padding:12px 20px;border:1px solid transparent;cursor:pointer}
+.primary{background:var(--red);color:#fff}
+.primary:disabled{opacity:.55;cursor:not-allowed}
+.ghost{background:transparent;color:var(--fg);border-color:var(--line)}
+.status{font-size:14px;color:var(--muted)}
+.status.ok{color:var(--ok);font-weight:600}
+.status.err{color:var(--red);font-weight:600}
+.notice{border-radius:8px;padding:12px 16px;background:var(--warn-bg);font-size:15px}
+.notice.ok{background:var(--ok-bg)}
+/* resultados */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.card b{font-family:var(--display);font-size:28px;font-variant-numeric:tabular-nums;line-height:1.1}
+.card small{color:var(--muted);font-size:13px}
+.bars{display:flex;flex-direction:column;gap:12px}
+.bar{display:grid;grid-template-columns:110px 1fr 44px;gap:10px;align-items:center;font-size:14px}
+.bar .track{height:12px;background:var(--surface-2);border-radius:6px;overflow:hidden}
+.bar .fill{height:100%;background:var(--accent);border-radius:6px}
+.bar b{font-variant-numeric:tabular-nums;text-align:right}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--display);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--surface-2)}
+td .pill{display:inline-block;font-size:12px;border-radius:10px;padding:1px 8px;background:var(--chip);margin:1px 2px 1px 0}
+td .pill.on{background:var(--ok-bg);color:var(--ok);font-weight:600}
+details{background:var(--surface);border:1px solid var(--line);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600}
+details dl{margin:0;padding:0 16px 16px;display:grid;grid-template-columns:minmax(0,1fr);gap:4px}
+details dt{color:var(--muted);font-size:13px;margin-top:8px}
+details dd{margin:0;white-space:pre-wrap}
+.empty{color:var(--muted);text-align:center;padding:28px 16px;border:1px dashed var(--line);border-radius:8px}
+footer{color:var(--muted);font-size:13px}
+h2.block{font-size:18px;margin-top:10px;padding-top:14px;border-top:2px solid var(--line)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.grid2>*{min-width:0}
+.hbars{display:flex;flex-direction:column;gap:10px}
+.hb{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 34px;gap:10px;align-items:center;font-size:14px}
+.hb-l{overflow-wrap:anywhere}
+.hb .track{position:relative;height:14px;background:var(--surface-2);border-radius:4px}
+.hb .fill{height:100%;background:var(--accent);border-radius:0 4px 4px 0}
+.hb .fill.low{background:var(--red)}
+.hb .ref{position:absolute;left:50%;top:-4px;bottom:-4px;width:0;border-left:2px dashed var(--muted)}
+.hb b{font-variant-numeric:tabular-nums;text-align:right}
+.scored+.axisnote{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 34px;gap:10px;font-size:11px;color:var(--muted)}
+.ax{position:relative;height:14px}.ax span{position:absolute;top:0}.ax .m{left:50%;transform:translateX(-50%)}.ax .e{right:0}
+.cnote{margin:0;font-size:13px;color:var(--muted)}
+.muted{color:var(--muted)}
+table.heat td.hc{background:color-mix(in srgb,var(--accent) var(--p),var(--surface));text-align:center;font-variant-numeric:tabular-nums;font-weight:600;border:2px solid var(--surface)}
+table.heat td.hc span.inv{color:var(--accent-fg)}
+table.heat th:not(:first-child){text-align:center}
+.pri{display:inline-block;font-family:var(--display);font-weight:700;font-size:12px;border-radius:4px;padding:2px 8px;white-space:nowrap}
+.p-a{background:var(--red);color:#fff}.p-m{background:var(--yellow);color:#14262B}.p-b{background:var(--chip);color:var(--fg)}
+td.num{font-variant-numeric:tabular-nums;text-align:right}
+@media (prefers-reduced-motion:no-preference){.fill{transition:width .4s ease}}
+</style>
+<meta name="robots" content="noindex">
+</head>
+<body>
+
+<header class="brand">
+  <div class="wrap">
+    <div class="logo"><img alt="Pacaembu Construtora" src="data:image/png;base64,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"></div>
+    <h1>Diagnóstico BIM – Fase 01 · Admin</h1>
+    <p>Questionários para o levantamento de maturidade, tecnologia, processos e projetistas da implementação BIM nos loteamentos da Pacaembu. Conduzido pela CSBIM.</p>
+  </div>
+  <div class="stripe" aria-hidden="true"><i></i><i></i><i></i></div>
+</header>
+<nav class="tabs" aria-label="Questionários"><div class="wrap" id="tabs"></div></nav>
+<main><div class="wrap" id="view"></div></main>
+
+<script>
+const SCALE_ENDS=["Discordo totalmente","Concordo totalmente"];
+const FORMS=[
+ {id:"maturidade",nav:"Maturidade BIM",title:"Questionário de maturidade BIM",who:"Equipe técnica da Pacaembu",time:"10–15 min",
+  intro:"Responda com base no seu dia a dia hoje. Não existe resposta certa: o objetivo é entender o ponto de partida da equipe.",
+  sections:[
+   {t:"Perfil",qs:[
+    {id:"nome",l:"Nome",type:"text",req:1},
+    {id:"area",l:"Área",type:"radio",req:1,o:["Projetos","Orçamento","Planejamento","Obras","Incorporação / Comercial","TI","Diretoria","Outra"]},
+    {id:"funcao",l:"Função ou cargo",type:"text"},
+    {id:"tempo",l:"Tempo de empresa",type:"radio",o:["Menos de 1 ano","1 a 3 anos","3 a 5 anos","Mais de 5 anos"]},
+    {id:"lotes",l:"Você participa dos projetos de loteamento?",type:"radio",o:["Sim, diretamente","Às vezes","Não"]}]},
+   {t:"Pessoas",dim:"Pessoas",qs:[
+    {id:"p1",l:"Conheço os conceitos de BIM e como ele se aplica a infraestrutura.",type:"scale",dim:"Pessoas"},
+    {id:"p2",l:"Tenho experiência prática com o Civil 3D.",type:"scale",dim:"Pessoas"},
+    {id:"p3",l:"Tenho experiência com Navisworks ou outra ferramenta de compatibilização.",type:"scale",dim:"Pessoas"},
+    {id:"p4",l:"Consigo abrir e consultar modelos 3D ou IFC recebidos dos projetistas.",type:"scale",dim:"Pessoas"},
+    {id:"p5",l:"Tenho interesse em ser capacitado em BIM.",type:"scale",dim:"Pessoas"}]},
+   {t:"Processos",qs:[
+    {id:"r1",l:"Os projetos dos loteamentos seguem um padrão de entrega definido pela Pacaembu.",type:"scale",dim:"Processos"},
+    {id:"r2",l:"As interferências entre disciplinas são identificadas antes de chegar à obra.",type:"scale",dim:"Processos"},
+    {id:"r3",l:"Os quantitativos para orçamento são extraídos de forma confiável e rastreável.",type:"scale",dim:"Processos"},
+    {id:"r4",l:"O planejamento da obra está conectado aos projetos.",type:"scale",dim:"Processos"},
+    {id:"r5",l:"Fica sempre claro qual é a versão vigente de cada projeto.",type:"scale",dim:"Processos"}]},
+   {t:"Tecnologia",qs:[
+    {id:"t1",l:"Os arquivos de projeto ficam em um local centralizado e fácil de acessar.",type:"scale",dim:"Tecnologia"},
+    {id:"t2",l:"Meu computador atende bem aos softwares que uso.",type:"scale",dim:"Tecnologia"},
+    {id:"t3",l:"A troca de arquivos com os projetistas é organizada.",type:"scale",dim:"Tecnologia"},
+    {id:"softs",l:"Quais softwares você usa no trabalho?",type:"check",o:["AutoCAD","Civil 3D","Navisworks","Revit","InfraWorks","Excel","MS Project","QGIS / ArcGIS","SketchUp","Visualizador IFC"]},
+    {id:"softs_outros",l:"Outros softwares",type:"text"}]},
+   {t:"Expectativas",qs:[
+    {id:"dores",l:"Quais são as maiores dificuldades hoje no ciclo de projeto dos loteamentos?",type:"textarea"},
+    {id:"espera",l:"O que você espera que o BIM melhore no seu trabalho?",type:"textarea"}]}
+  ]},
+ {id:"tecnologia",nav:"Tecnologia",title:"Inventário de tecnologia",who:"TI e coordenação",time:"15 min",
+  intro:"Levantamento da infraestrutura atual para dimensionar hardware, licenças e o ambiente comum de dados (CDE).",
+  sections:[
+   {t:"Responsável",qs:[{id:"nome",l:"Nome",type:"text",req:1},{id:"funcao",l:"Função",type:"text"}]},
+   {t:"Computadores",qs:[
+    {id:"qtd_pc",l:"Quantos computadores a área técnica usa?",type:"number"},
+    {id:"tipo_pc",l:"Tipo predominante",type:"radio",o:["Notebooks","Desktops","Misto"]},
+    {id:"config",l:"Configuração típica (processador, memória RAM, placa de vídeo, SSD)",type:"textarea",hint:"Ex.: Intel Core i5-13450HX, 16 GB, RTX 3050 6 GB, SSD 512 GB"},
+    {id:"so",l:"Sistema operacional",type:"radio",o:["Windows 11","Windows 10","Misto","Outro"]},
+    {id:"renovacao",l:"Existe previsão de renovação de equipamentos?",type:"radio",o:["Sim, nos próximos 6 meses","Sim, em mais de 6 meses","Não"]}]},
+   {t:"Softwares e licenças",qs:[
+    {id:"licencas",l:"Softwares e licenças atuais",type:"textarea",hint:"Uma linha por software: nome, quantidade, tipo de licença e vencimento"},
+    {id:"autodesk",l:"A Pacaembu tem contrato com a Autodesk hoje?",type:"radio",o:["Sim","Não","Não sei"]},
+    {id:"autodesk_tipo",l:"Se sim, qual modalidade?",type:"radio",o:["Assinatura por produto","AEC Collection","Autodesk Flex","Outra"]},
+    {id:"m365",l:"Usa Microsoft 365 / Teams?",type:"radio",o:["Sim","Não"]},
+    {id:"instalacao",l:"Quem instala softwares nas máquinas?",type:"radio",o:["Somente a TI","O próprio usuário","Misto"]}]},
+   {t:"Arquivos e rede",qs:[
+    {id:"armazen",l:"Onde os arquivos de projeto ficam hoje?",type:"check",o:["Servidor local","OneDrive / SharePoint","Google Drive","Dropbox","Autodesk Docs","E-mail","Computador de cada pessoa"]},
+    {id:"backup",l:"Backup dos arquivos de projeto",type:"radio",o:["Automático diário","Semanal","Manual","Não há"]},
+    {id:"internet",l:"Velocidade aproximada da internet no escritório",type:"text",hint:"Ex.: 500 Mbps"},
+    {id:"estab",l:"A internet é estável para trabalhar com arquivos grandes na nuvem.",type:"scale"},
+    {id:"vpn",l:"Existe acesso remoto ou VPN?",type:"radio",o:["Sim","Não"]},
+    {id:"seguranca",l:"Restrições de segurança ou políticas de TI que devemos considerar",type:"textarea"}]}
+  ]},
+ {id:"processos",nav:"Processos",title:"Levantamento de processos atuais",who:"Coordenação de projetos, orçamento, planejamento e obras",time:"20 min",
+  intro:"Como os projetos dos loteamentos são contratados, recebidos, compatibilizados, orçados e planejados hoje.",
+  sections:[
+   {t:"Responsável",qs:[{id:"nome",l:"Nome",type:"text",req:1},{id:"area",l:"Área",type:"radio",req:1,o:["Projetos","Orçamento","Planejamento","Obras","Outra"]}]},
+   {t:"Contratação e recebimento de projetos",qs:[
+    {id:"lot_ano",l:"Quantos loteamentos são desenvolvidos por ano, em média?",type:"number"},
+    {id:"disc",l:"Quais disciplinas são contratadas de projetistas externos?",type:"check",o:["Topografia","Geométrico","Terraplenagem","Pavimentação","Drenagem","Água","Esgoto","Sinalização","Iluminação / elétrica","Paisagismo"]},
+    {id:"formatos",l:"Em que formatos os projetos são recebidos?",type:"check",o:["DWG","PDF","Modelo Civil 3D","IFC","Planilhas"]},
+    {id:"padrao",l:"Existe um padrão ou caderno de diretrizes para os projetistas?",type:"radio",o:["Sim, atualizado","Sim, desatualizado","Não"]},
+    {id:"fluxo",l:"Descreva o fluxo atual, da contratação do projetista até a liberação para obra",type:"textarea"}]},
+   {t:"Compatibilização, orçamento e planejamento",qs:[
+    {id:"compat",l:"Como a compatibilização entre disciplinas é feita hoje?",type:"textarea"},
+    {id:"quant",l:"Como os quantitativos são levantados?",type:"radio",o:["Pelo projetista","Internamente, em planilha","Em software","Misto"]},
+    {id:"orc_tool",l:"Ferramenta de orçamento usada hoje",type:"text"},
+    {id:"plan_tool",l:"Ferramenta de planejamento",type:"radio",o:["MS Project","Excel","Primavera","Outra","Nenhuma"]},
+    {id:"retrabalho",l:"Revisões de projeto por erro ou interferência acontecem com frequência.",type:"scale"},
+    {id:"aprov",l:"Principais gargalos nas aprovações externas (prefeitura, concessionárias)",type:"textarea"}]},
+   {t:"Prioridades",qs:[
+    {id:"usos",l:"Quais usos do BIM trariam mais ganho para a sua área?",type:"check",o:["Compatibilização","Quantitativos","Orçamento (5D)","Planejamento (4D)","Controle de revisões","Visualização para aprovação","Visualização para vendas","As built"]},
+    {id:"dores",l:"Principais dores do processo atual",type:"textarea"}]}
+  ]},
+ {id:"projetistas",nav:"Projetistas",title:"Perfil dos projetistas contratados",who:"Escritórios de projeto terceirizados",time:"10 min",
+  intro:"Levantamento das ferramentas e da experiência BIM dos projetistas, para alinhar o Caderno BIM e os padrões de entrega.",
+  sections:[
+   {t:"Empresa",qs:[
+    {id:"empresa",l:"Nome da empresa",type:"text",req:1},
+    {id:"nome",l:"Responsável pelas respostas",type:"text",req:1},
+    {id:"contato",l:"E-mail ou telefone de contato",type:"text"},
+    {id:"disc",l:"Disciplinas que atende para a Pacaembu",type:"check",o:["Topografia","Geométrico","Terraplenagem","Pavimentação","Drenagem","Água","Esgoto","Sinalização","Iluminação / elétrica","Paisagismo"]},
+    {id:"equipe",l:"Quantos profissionais da equipe modelam em 3D?",type:"number"}]},
+   {t:"Ferramentas e experiência",qs:[
+    {id:"bim",l:"A empresa já trabalha em BIM?",type:"radio",o:["Sim, em todos os projetos","Em alguns projetos","Ainda não"]},
+    {id:"softs",l:"Softwares usados",type:"check",o:["Civil 3D","Cadinfra","CTopo","AutoCAD","InfraWorks","Navisworks","Revit","Outros"]},
+    {id:"versao",l:"Versão do Civil 3D",type:"radio",o:["2026","2025","2024 ou anterior","Não usa"]},
+    {id:"ifc",l:"Consegue exportar os modelos em IFC?",type:"radio",o:["Sim","Não","Não sei"]},
+    {id:"cde",l:"Experiência com ambiente comum de dados (CDE)",type:"radio",o:["Autodesk Docs / Forma","BIM 360","Outro CDE","Nenhuma"]},
+    {id:"caderno",l:"A empresa pode seguir um Caderno BIM definido pela Pacaembu?",type:"radio",o:["Sim","Sim, com adaptação","Não"]},
+    {id:"obs",l:"Comentários ou dificuldades que devemos conhecer",type:"textarea"}]}
+  ]}
+];
+const DIMS=["Pessoas","Processos","Tecnologia"];
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let db=null,user=null,uid=null,isAdmin=false,mine={},allDocs=[],unsubAll=null,unsubMine=null,readOnly=false;
+const store={get(k){try{return JSON.parse(localStorage.getItem(k)||"null")}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+function current(){const h=(location.hash||"").slice(1);return h==="respostas"&&isAdmin?"respostas":(FORMS.find(f=>f.id===h)?h:FORMS[0].id)}
+function renderTabs(){
+  const cur=current();
+  const items=FORMS.map((f,i)=>`<a href="#${f.id}" ${cur===f.id?'aria-current="page"':''}><span class="n">${i+1}</span>${esc(f.nav)}${mine[f.id]?' <span class="done" aria-label="enviado">✓</span>':''}</a>`);
+  if(isAdmin) items.push(`<a href="#respostas" ${cur==="respostas"?'aria-current="page"':''}>Respostas <span class="n">${allDocs.length}</span></a>`);
+  $("#tabs").innerHTML=items.join("");
+}
+function qHTML(q,fid,val){
+  const id=`${fid}-${q.id}`, req=q.req?' <span class="req">*</span>':'', hint=q.hint?`<div class="hint">${esc(q.hint)}</div>`:'';
+  if(q.type==="text"||q.type==="number") return `<div class="q"><label for="${id}">${esc(q.l)}${req}</label>${hint}<input id="${id}" name="${q.id}" type="${q.type==="number"?"number":"text"}" ${q.type==="number"?'min="0" inputmode="numeric"':''} ${q.req?'required':''} value="${esc(val??"")}"></div>`;
+  if(q.type==="textarea") return `<div class="q"><label for="${id}">${esc(q.l)}${req}</label>${hint}<textarea id="${id}" name="${q.id}">${esc(val??"")}</textarea></div>`;
+  if(q.type==="radio"||q.type==="check"){
+    const t=q.type==="radio"?"radio":"checkbox", arr=Array.isArray(val)?val:[val];
+    return `<div class="q" role="group" aria-labelledby="${id}-l"><div class="lbl" id="${id}-l">${esc(q.l)}${req}${q.type==="check"?' <small class="hint">(marque quantas quiser)</small>':''}</div>${hint}<div class="opts">${q.o.map((o,i)=>`<label class="opt"><input type="${t}" id="${id}-${i}" name="${q.id}" value="${esc(o)}" ${arr.includes(o)?'checked':''} ${q.req&&t==="radio"?'required':''}><span>${esc(o)}</span></label>`).join("")}</div></div>`;
+  }
+  if(q.type==="scale") return `<div class="q" role="group" aria-labelledby="${id}-l"><div class="lbl" id="${id}-l">${esc(q.l)}</div><div class="scale">${[1,2,3,4,5].map(n=>`<label><input type="radio" id="${id}-${n}" name="${q.id}" value="${n}" ${String(val)===String(n)?'checked':''}><span>${n}</span></label>`).join("")}</div><div class="scale-ends"><span>1 · ${SCALE_ENDS[0]}</span><span>5 · ${SCALE_ENDS[1]}</span></div></div>`;
+}
+function renderForm(f){
+  const saved=mine[f.id]?.respostas, draft=store.get("draft-"+f.id), vals=saved||draft||{};
+  const sent=mine[f.id]?.enviadoEm;
+  $("#view").innerHTML=`
+   <div class="intro"><div class="eyebrow">Fase 01 · Diagnóstico</div><h2>${esc(f.title)}</h2>
+   <div class="meta"><span>${esc(f.who)}</span><span>${esc(f.time)}</span></div><p style="margin:4px 0 0;max-width:65ch">${esc(f.intro)}</p></div>
+   ${sent?`<div class="notice ok">Você já enviou este questionário em ${new Date(sent).toLocaleString("pt-BR")}. Pode ajustar as respostas e enviar de novo.</div>`:''}
+   ${!db?`<div class="notice">Para enviar, abra esta página conectado à sua conta Claude com acesso de colaborador. Suas respostas ficam salvas como rascunho neste navegador.</div>`:''}
+   <form id="frm" novalidate><fieldset>
+    ${f.sections.map(s=>`<section class="section"><h3>${esc(s.t)}${s.qs.some(q=>q.type==="scale")?' <small>escala de 1 a 5</small>':''}</h3>${s.qs.map(q=>qHTML(q,f.id,vals[q.id])).join("")}</section>`).join("")}
+   </fieldset>
+   <div class="actions" style="margin-top:20px"><button class="primary" type="submit" id="send" ${!db||readOnly?'disabled':''}>Enviar respostas</button><span class="status" id="st" role="status" aria-live="polite"></span></div>
+   </form>
+   <footer>As respostas são vistas apenas pela equipe da CSBIM responsável pelo diagnóstico.</footer>`;
+  const frm=$("#frm");
+  let t=null;
+  frm.addEventListener("input",()=>{clearTimeout(t);t=setTimeout(()=>store.set("draft-"+f.id,collect(f)),400)});
+  frm.addEventListener("submit",async e=>{e.preventDefault();await submit(f)});
+}
+function collect(f){
+  const frm=$("#frm"), out={};
+  f.sections.forEach(s=>s.qs.forEach(q=>{
+    if(q.type==="check") out[q.id]=[...frm.querySelectorAll(`input[name="${q.id}"]:checked`)].map(i=>i.value);
+    else if(q.type==="radio"||q.type==="scale"){const c=frm.querySelector(`input[name="${q.id}"]:checked`);out[q.id]=c?(q.type==="scale"?Number(c.value):c.value):null}
+    else{const el=frm.querySelector(`[name="${q.id}"]`);out[q.id]=el?el.value.trim():""}
+  }));
+  return out;
+}
+async function submit(f){
+  const st=$("#st"), btn=$("#send"), ans=collect(f);
+  const missing=f.sections.flatMap(s=>s.qs).filter(q=>q.req&&(!ans[q.id]||(Array.isArray(ans[q.id])&&!ans[q.id].length)));
+  if(missing.length){st.className="status err";st.textContent="Preencha: "+missing.map(q=>q.l).join(", ")+".";return}
+  if(!db||!uid){st.className="status err";st.textContent="Não foi possível enviar: acesso de colaborador necessário.";return}
+  btn.disabled=true;st.className="status";st.textContent="Enviando…";
+  try{
+    const ref=db.doc("respostas/"+uid), snap=await ref.get();
+    const body=snap.exists?JSON.parse(JSON.stringify(snap.data())):{forms:{}};
+    body.forms=body.forms||{};
+    body.forms[f.id]={respostas:ans,enviadoEm:new Date().toISOString()};
+    body.nome=ans.nome||body.nome||"";
+    if(ans.empresa) body.empresa=ans.empresa;
+    if(ans.area) body.area=ans.area;
+    body.atualizadoEm=new Date().toISOString();
+    await ref.set(body);
+    store.set("draft-"+f.id,null);
+    st.className="status ok";st.textContent="Respostas enviadas. Obrigado!";
+  }catch(e){
+    st.className="status err";
+    st.textContent=e&&e.code==="invalid_argument"?"Seu acesso permite apenas visualizar. Peça acesso de colaborador à CSBIM.":"Não foi possível enviar agora. Tente novamente em instantes.";
+    if(e&&e.code==="invalid_argument") readOnly=true;
+  }finally{btn.disabled=readOnly}
+}
+function avg(nums){const v=nums.filter(n=>typeof n==="number");return v.length?v.reduce((a,b)=>a+b,0)/v.length:null}
+const ETAPAS={1:"Etapa 01 · Diagnóstico",2:"Etapa 02 · CDE",3:"Etapa 03 · Caderno BIM",4:"Etapa 04 · Capacitação e Piloto"};
+const ACOES={
+ p1:["Pouco conhecimento dos conceitos BIM","Workshop de nivelamento sobre BIM em infraestrutura",4],
+ p2:["Pouca experiência com Civil 3D","Trilha de capacitação em Civil 3D (conferência de modelos)",4],
+ p3:["Pouca experiência com compatibilização","Treinamento em Navisworks e rotina de clash detection",4],
+ p4:["Dificuldade para consultar modelos 3D/IFC","Definir visualizador IFC e treinar a consulta de modelos",3],
+ p5:["Baixo interesse em capacitação","Comunicar ganhos do BIM e envolver lideranças",1],
+ r1:["Sem padrão de entrega dos projetistas","Requisitos de entrega no Caderno BIM",3],
+ r2:["Interferências chegam à obra","Processo de compatibilização no Projeto Piloto",4],
+ r3:["Quantitativos pouco confiáveis","Padronizar a extração de quantitativos dos modelos",3],
+ r4:["Planejamento desconectado dos projetos","Piloto de planejamento 4D vinculado ao cronograma",4],
+ r5:["Versão vigente dos projetos não é clara","Fluxo de revisão e status no CDE",2],
+ t1:["Arquivos sem local centralizado","Implantação do CDE com estrutura de pastas",2],
+ t2:["Computadores abaixo do necessário","Adequar equipamentos ao perfil mínimo de hardware",1],
+ t3:["Troca de arquivos com projetistas desorganizada","Protocolo de transmissão no CDE",2]
+};
+let showSample=false;
+function sampleDocs(){
+  const areas=["Projetos","Orçamento","Planejamento","Obras","Projetos","Obras"], base={Projetos:[3,2,3,3,5, 2,2,2,2,2, 2,4,2],Orçamento:[2,1,1,2,4, 2,2,2,1,2, 2,3,2],Planejamento:[2,1,1,2,4, 2,2,3,1,3, 3,3,3],Obras:[2,1,1,1,4, 1,1,2,1,2, 2,3,2]};
+  const ids=["p1","p2","p3","p4","p5","r1","r2","r3","r4","r5","t1","t2","t3"];
+  const docs=areas.map((a,i)=>{const r={nome:"Exemplo "+(i+1),area:a,softs:i%2?["AutoCAD","Excel"]:["AutoCAD","Civil 3D","Excel","MS Project"]};ids.forEach((id,k)=>r[id]=Math.max(1,Math.min(5,base[a][k]+((i+k)%3===0?1:0))));return {nome:r.nome,area:a,atualizadoEm:new Date().toISOString(),forms:{maturidade:{respostas:r}}}});
+  docs.push({nome:"Exemplo TI",area:"TI",forms:{tecnologia:{respostas:{armazen:["Servidor local","E-mail","Computador de cada pessoa"],backup:"Manual",autodesk:"Não",estab:3}}}});
+  docs.push({nome:"Exemplo Coord.",area:"Projetos",forms:{processos:{respostas:{usos:["Compatibilização","Quantitativos","Controle de revisões","Orçamento (5D)"],retrabalho:4,formatos:["DWG","PDF"]}}}});
+  docs.push({nome:"Exemplo Orç.",area:"Orçamento",forms:{processos:{respostas:{usos:["Quantitativos","Orçamento (5D)","Compatibilização"],retrabalho:4,formatos:["DWG","PDF","Planilhas"]}}}});
+  docs.push({nome:"Exemplo Projetista A",empresa:"Escritório A",forms:{projetistas:{respostas:{softs:["Civil 3D","AutoCAD"],versao:"2025",ifc:"Sim",bim:"Em alguns projetos"}}}});
+  docs.push({nome:"Exemplo Projetista B",empresa:"Escritório B",forms:{projetistas:{respostas:{softs:["AutoCAD","CTopo"],versao:"Não usa",ifc:"Não sei",bim:"Ainda não"}}}});
+  return docs;
+}
+function tally(list,key){const m={};list.forEach(r=>{const v=r?.[key];(Array.isArray(v)?v:(v?[v]:[])).forEach(x=>m[x]=(m[x]||0)+1)});return Object.entries(m).sort((a,b)=>b[1]-a[1])}
+function countBars(entries,total,unit){
+  if(!entries.length) return `<div class="empty">Sem respostas ainda.</div>`;
+  const max=Math.max(...entries.map(e=>e[1]));
+  return `<div class="hbars">${entries.map(([k,v])=>`<div class="hb" title="${esc(k)}: ${v} de ${total} ${unit}"><span class="hb-l">${esc(k)}</span><div class="track"><div class="fill" style="width:${(v/max*100).toFixed(0)}%"></div></div><b>${v}</b></div>`).join("")}</div>`;
+}
+function scoreBars(items){
+  return `<div class="hbars scored">${items.map(it=>`<div class="hb" title="${esc(it.label)}: média ${it.v.toFixed(1)} de 5 (${it.n} respostas)"><span class="hb-l">${esc(it.label)}</span><div class="track"><div class="fill ${it.v<3?'low':''}" style="width:${Math.max(2,(it.v-1)/4*100).toFixed(0)}%"></div><i class="ref" aria-hidden="true"></i></div><b>${it.v.toFixed(1)}</b></div>`).join("")}</div><div class="axisnote"><span></span><div class="ax"><span>1</span><span class="m">meta 3</span><span class="e">5</span></div><span></span></div>`;
+}
+function chartCard(title,sub,body,note){return `<section class="section chart"><h3>${esc(title)}${sub?` <small>${esc(sub)}</small>`:''}</h3>${body}${note?`<p class="cnote">${note}</p>`:''}</section>`}
+function renderResults(){
+  const docs=showSample?sampleDocs():allDocs;
+  const scaleQs=FORMS[0].sections.flatMap(s=>s.qs).filter(q=>q.type==="scale");
+  const mat=docs.map(d=>d.forms?.maturidade?.respostas).filter(Boolean);
+  const tec=docs.map(d=>d.forms?.tecnologia?.respostas).filter(Boolean);
+  const pro=docs.map(d=>d.forms?.processos?.respostas).filter(Boolean);
+  const prj=docs.map(d=>d.forms?.projetistas?.respostas).filter(Boolean);
+  const counts=FORMS.map(f=>({f,n:docs.filter(d=>d.forms?.[f.id]).length}));
+  const dimAvg=DIMS.map(dm=>({label:dm,v:avg(mat.flatMap(r=>scaleQs.filter(q=>q.dim===dm).map(q=>r[q.id]))),n:mat.length})).filter(x=>x.v!=null);
+  const areas=[...new Set(mat.map(r=>r.area).filter(Boolean))];
+  const heat=areas.map(a=>({a,n:mat.filter(r=>r.area===a).length,vals:DIMS.map(dm=>avg(mat.filter(r=>r.area===a).flatMap(r=>scaleQs.filter(q=>q.dim===dm).map(q=>r[q.id]))))}));
+  const perQ=scaleQs.map(q=>({id:q.id,label:ACOES[q.id]?.[0]||q.l,full:q.l,v:avg(mat.map(r=>r[q.id])),n:mat.filter(r=>typeof r[q.id]==="number").length})).filter(x=>x.v!=null).sort((a,b)=>a.v-b.v);
+  // pré-plano
+  const plan=perQ.filter(x=>x.v<3.5).map(x=>({lac:ACOES[x.id][0],acao:ACOES[x.id][1],etapa:ACOES[x.id][2],v:x.v,pri:x.v<2.5?"Alta":x.v<3?"Média":"Baixa",src:"Maturidade"}));
+  const retr=avg(pro.map(r=>r.retrabalho));
+  if(retr!=null&&retr>=3) plan.push({lac:"Retrabalho frequente por erro ou interferência",acao:"Compatibilização antes da liberação para obra",etapa:4,v:retr,pri:retr>=4?"Alta":"Média",src:"Processos",inv:1});
+  const estab=avg(tec.map(r=>r.estab));
+  if(estab!=null&&estab<3) plan.push({lac:"Internet instável para arquivos na nuvem",acao:"Avaliar link de internet antes da aquisição do CDE",etapa:2,v:estab,pri:"Alta",src:"Tecnologia"});
+  const prjOld=prj.filter(r=>r.versao&&r.versao!=="2026").length;
+  if(prjOld) plan.push({lac:`${prjOld} projetista${prjOld>1?'s':''} fora da versão 2026 do Civil 3D`,acao:"Alinhar versão 2026.2 e requisitos no Caderno BIM",etapa:3,v:null,pri:"Média",src:"Projetistas"});
+  const prio={Alta:0,Média:1,Baixa:2}; plan.sort((a,b)=>prio[a.pri]-prio[b.pri]||a.etapa-b.etapa);
+  const rows=docs.slice().sort((a,b)=>String(b.atualizadoEm||"").localeCompare(String(a.atualizadoEm||"")));
+  const usos=tally(pro,"usos"), softs=tally(mat,"softs"), armaz=tally(tec,"armazen"), psoft=tally(prj,"softs"), pver=tally(prj,"versao");
+  $("#view").innerHTML=`
+   <div class="intro"><div class="eyebrow">Somente equipe CSBIM</div><h2>Respostas e pré-plano de ação</h2>
+   <p style="margin:4px 0 0;max-width:65ch">Resultados consolidados dos questionários da Fase 01. Escala de 1 a 5; a meta mínima é 3.</p></div>
+   <div class="actions"><button class="ghost" type="button" id="toggleSample" aria-pressed="${showSample}">${showSample?"Voltar às respostas reais":"Mostrar com dados de exemplo"}</button></div>
+   ${showSample?`<div class="notice"><b>Dados de exemplo.</b> Os números abaixo são fictícios, só para visualizar os gráficos. Eles não estão salvos.</div>`:''}
+   <div class="cards">${counts.map(c=>`<div class="card"><b>${c.n}</b><small>${esc(c.f.nav)}</small></div>`).join("")}</div>
+
+   <h2 class="block">Diagnóstico</h2>
+   ${chartCard("Maturidade por dimensão",`${mat.length} resposta${mat.length===1?'':'s'}`, dimAvg.length?scoreBars(dimAvg):`<div class="empty">Aparece quando chegar a primeira resposta do questionário de maturidade.</div>`)}
+   ${chartCard("Maturidade por área","média de 1 a 5", heat.length?`<div class="tbl"><table class="heat"><thead><tr><th>Área</th>${DIMS.map(d=>`<th>${d}</th>`).join("")}</tr></thead><tbody>${heat.map(h=>`<tr><td><b>${esc(h.a)}</b> <small class="muted">(${h.n})</small></td>${h.vals.map((v,i)=>v==null?'<td>–</td>':`<td class="hc" style="--p:${Math.round((v-1)/4*85+8)}%" title="${esc(h.a)} · ${DIMS[i]}: ${v.toFixed(1)}"><span class="${(v-1)/4*85+8>50?'inv':''}">${v.toFixed(1)}</span></td>`).join("")}</tr>`).join("")}</tbody></table></div>`:`<div class="empty">Aparece quando houver respostas com a área preenchida.</div>`, "Quanto mais escura a célula, maior a maturidade. As áreas mais claras são as primeiras a capacitar.")}
+   ${chartCard("Maiores lacunas","5 afirmações com menor média", perQ.length?scoreBars(perQ.slice(0,5)):`<div class="empty">Aparece com as respostas de maturidade.</div>`, "Barras em vermelho estão abaixo da meta 3.")}
+
+   <h2 class="block">Prioridades e recursos</h2>
+   <div class="grid2">
+   ${chartCard("Usos BIM mais pedidos",`${pro.length} resposta${pro.length===1?'':'s'} de Processos`,countBars(usos,pro.length,"respostas"))}
+   ${chartCard("Softwares usados pela equipe",`${mat.length} resposta${mat.length===1?'':'s'}`,countBars(softs,mat.length,"pessoas"))}
+   ${chartCard("Onde ficam os arquivos","Inventário de tecnologia",countBars(armaz,tec.length,"respostas"))}
+   ${chartCard("Projetistas: versão do Civil 3D",`${prj.length} escritório${prj.length===1?'':'s'}`,countBars(pver,prj.length,"escritórios"))}
+   </div>
+   ${prj.length?chartCard("Projetistas: softwares usados","",countBars(psoft,prj.length,"escritórios")):''}
+
+   <h2 class="block">Pré-plano de ação</h2>
+   <p style="margin:-8px 0 0;max-width:65ch;color:var(--muted)">Gerado das respostas: cada afirmação com média abaixo de 3,5 vira uma linha. Prioridade alta abaixo de 2,5; média entre 2,5 e 3; baixa entre 3 e 3,5. Use como rascunho para o PIB (atividade 1.7).</p>
+   ${plan.length?`<div class="tbl"><table class="plan"><thead><tr><th>Prioridade</th><th>Lacuna</th><th>Ação sugerida</th><th>Etapa</th><th>Média</th></tr></thead><tbody>${plan.map(p=>`<tr><td><span class="pri p-${p.pri==="Alta"?"a":p.pri==="Média"?"m":"b"}">${p.pri==="Alta"?"▲":p.pri==="Média"?"■":"▼"} ${p.pri}</span></td><td>${esc(p.lac)}<br><small class="muted">${esc(p.src)}</small></td><td>${esc(p.acao)}</td><td>${esc(ETAPAS[p.etapa])}</td><td class="num">${p.v==null?"–":p.v.toFixed(1)}</td></tr>`).join("")}</tbody></table></div>`:`<div class="empty">O pré-plano aparece quando as respostas indicarem lacunas (médias abaixo de 3,5).</div>`}
+
+   <h2 class="block">Quem respondeu</h2>
+   ${rows.length?`<div class="tbl"><table><thead><tr><th>Nome</th><th>Área / empresa</th><th>Questionários</th><th>Atualizado</th></tr></thead><tbody>
+    ${rows.map(d=>`<tr><td>${esc(d.nome||"—")}</td><td>${esc(d.empresa||d.area||"—")}</td><td>${FORMS.map(f=>`<span class="pill ${d.forms?.[f.id]?'on':''}">${esc(f.nav)}</span>`).join("")}</td><td>${d.atualizadoEm?new Date(d.atualizadoEm).toLocaleDateString("pt-BR"):"—"}</td></tr>`).join("")}
+   </tbody></table></div>
+   ${showSample?'':`<div style="display:flex;flex-direction:column;gap:10px">${rows.map(d=>`<details><summary>${esc(d.nome||"Sem nome")} ${d.empresa?'· '+esc(d.empresa):''}</summary><dl>${FORMS.filter(f=>d.forms?.[f.id]).map(f=>{const r=d.forms[f.id].respostas||{};return `<dt style="color:var(--red);font-weight:700;font-family:var(--display)">${esc(f.title)}</dt>`+f.sections.flatMap(s=>s.qs).map(q=>{const v=r[q.id];const t=Array.isArray(v)?v.join(", "):(v??"");return t===""||t===null?"":`<dt>${esc(q.l)}</dt><dd>${esc(t)}</dd>`}).join("")}).join("")}</dl></details>`).join("")}</div>`}`
+   :`<div class="empty">Nenhuma resposta ainda. Compartilhe o link desta página com a equipe e os projetistas.</div>`}`;
+  $("#toggleSample").addEventListener("click",()=>{showSample=!showSample;renderResults()});
+}
+
+function render(){renderTabs();const c=current();if(c==="respostas")renderResults();else renderForm(FORMS.find(f=>f.id===c))}
+
+isAdmin=true;
+function current(){return "respostas"}
+function renderTabs(){$("#tabs").innerHTML=`<a href="#respostas" aria-current="page">Área de admin · Respostas <span class="n">${allDocs.length}</span></a><a href="index.html">Ir para o questionário</a>`}
+function toDocs(rows){return rows.map(r=>({nome:r.nome,area:r.area,empresa:r.empresa,atualizadoEm:r.enviadoEm,forms:{[r.form]:{respostas:r.respostas||{},enviadoEm:r.enviadoEm}}}))}
+let RAW=[];
+function csv(){
+  const cols=["Data","Questionário","Nome","Área","Empresa"];const qmap=[];
+  FORMS.forEach(f=>f.sections.forEach(s=>s.qs.forEach(q=>{qmap.push([f.id,q.id]);cols.push(f.nav+" – "+q.l)})));
+  const cell=v=>{v=Array.isArray(v)?v.join("; "):(v??"");v=String(v);return /[",\n;]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+  const lines=[cols.map(cell).join(",")];
+  RAW.forEach(r=>{const row=[new Date(r.enviadoEm).toLocaleString("pt-BR"),(FORMS.find(f=>f.id===r.form)||{}).nav||r.form,r.nome,r.area,r.empresa];qmap.forEach(([fid,qid])=>row.push(fid===r.form?(r.respostas||{})[qid]:""));lines.push(row.map(cell).join(","))});
+  const blob=new Blob(["\ufeff"+lines.join("\n")],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="respostas_diagnostico_bim_fase01.csv";document.body.appendChild(a);a.click();a.remove();
+}
+async function load(key){
+  $("#view").innerHTML=`<div class="empty">Carregando respostas…</div>`;
+  try{
+    const r=await fetch(window.APPS_SCRIPT_URL+"?key="+encodeURIComponent(key));const j=await r.json();
+    if(!j.ok){try{sessionStorage.removeItem("adminKey")}catch(e){};login("Senha incorreta.");return}
+    try{sessionStorage.setItem("adminKey",key)}catch(e){}
+    RAW=j.rows||[];allDocs=toDocs(RAW);render();
+    const bar=document.createElement("div");bar.className="actions";
+    bar.innerHTML=`<button class="primary" type="button" id="dl">Baixar respostas (Excel/CSV)</button><button class="ghost" type="button" id="rf">Atualizar</button><button class="ghost" type="button" id="out">Sair</button>`;
+    let ab=document.getElementById("adminbar");if(!ab){ab=document.createElement("div");ab.id="adminbar";ab.className="wrap";ab.style.paddingTop="20px";$("main").prepend(ab)}ab.innerHTML="";ab.appendChild(bar);
+    $("#dl").onclick=csv;$("#rf").onclick=()=>load(key);$("#out").onclick=()=>{try{sessionStorage.removeItem("adminKey")}catch(e){};login()};
+  }catch(e){$("#view").innerHTML=`<div class="notice">Não foi possível carregar as respostas. Confira o endereço em config.js e a internet.</div>`}
+}
+function login(msg){
+  renderTabs();const ab0=document.getElementById("adminbar");if(ab0)ab0.remove();
+  $("#view").innerHTML=`<div class="intro"><div class="eyebrow">Somente equipe CSBIM</div><h2>Área de admin</h2></div>
+  ${!window.APPS_SCRIPT_URL?'<div class="notice">Configure o endereço do armazenamento em <code>config.js</code> (veja o README).</div>':''}
+  <form id="lg" class="section" novalidate><div class="q"><label for="pw">Senha de acesso</label><input id="pw" type="password" autocomplete="current-password"></div>
+  <div class="actions"><button class="primary" type="submit">Entrar</button><span class="status err">${msg||""}</span></div></form>`;
+  $("#lg").addEventListener("submit",e=>{e.preventDefault();const k=$("#pw").value.trim();if(k)load(k)});
+}
+let k0=null;try{k0=sessionStorage.getItem("adminKey")}catch(e){}
+if(k0&&window.APPS_SCRIPT_URL)load(k0);else login();
+</script>
+</body>
+</html>
