@@ -20,7 +20,9 @@ O GitHub Pages só hospeda páginas; ele não guarda dados. Por isso as resposta
 
 1. Entre numa conta Google e crie uma **Planilha** nova (ex.: “Respostas Diagnóstico BIM”).
 2. Na planilha: **Extensões › Apps Script**. Apague o conteúdo e cole o arquivo `apps-script/Codigo.gs`. Salve.
-3. **Configurações do projeto** (engrenagem) › **Propriedades do script** › Adicionar: nome `ADMIN_KEY`, valor = a senha da área de admin.
+3. **Configurações do projeto** (engrenagem) › **Propriedades do script** › adicione duas propriedades:
+   - `ADMIN_EMAIL` = o e-mail que entra na área de admin
+   - `ADMIN_KEY` = a senha da área de admin
 4. **Implantar › Nova implantação** › tipo **App da Web**:
    - Executar como: **Eu**
    - Quem pode acessar: **Qualquer pessoa**
@@ -33,11 +35,11 @@ Pronto: cada envio cria uma linha na aba **Respostas** da planilha e um e-mail p
 ## 3. Usar
 
 - Divulgue o link do `index.html` (pode ir numa guia **Site** do Teams).
-- Acompanhe pelo `admin.html` com a senha, ou direto na planilha.
+- Acompanhe pelo botão **Admin** (canto superior direito do formulário), com e-mail e senha, ou direto na planilha.
 - Para o relatório final: **Baixar respostas (Excel/CSV)** no admin.
 
 ## Observações
 
 - Alterou o `Codigo.gs`? **Implantar › Gerenciar implantações › Editar › Nova versão**, para valer.
-- A senha fica só nas Propriedades do script, nunca no GitHub.
+- O e-mail e a senha do admin ficam só nas Propriedades do script, nunca no GitHub.
 - O e-mail sai da conta Google usada na planilha (limite gratuito de 100 e-mails por dia).

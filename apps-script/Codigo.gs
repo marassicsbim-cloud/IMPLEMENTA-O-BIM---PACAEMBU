@@ -36,10 +36,16 @@ function doPost(e) {
   return json_({ ok: true });
 }
 
-/** Entrega as respostas para o admin.html (exige a senha ADMIN_KEY) */
+/** Entrega as respostas para o admin.html (exige ADMIN_EMAIL e ADMIN_KEY das Propriedades do script) */
 function doGet(e) {
-  const senha = PropertiesService.getScriptProperties().getProperty('ADMIN_KEY');
-  if (!senha || !e.parameter.key || e.parameter.key !== senha) return json_({ ok: false });
+  const props = PropertiesService.getScriptProperties();
+  const email = String(props.getProperty('ADMIN_EMAIL') || '').trim().toLowerCase();
+  const senha = props.getProperty('ADMIN_KEY');
+  const p = e.parameter || {};
+  if (!email || !senha || String(p.email || '').trim().toLowerCase() !== email || p.key !== senha) {
+    Utilities.sleep(800);
+    return json_({ ok: false });
+  }
   const valores = aba_().getDataRange().getValues();
   valores.shift();
   const rows = valores.filter(r => r[1]).map(r => ({

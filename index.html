@@ -122,14 +122,18 @@ table.heat th:not(:first-child){text-align:center}
 .p-a{background:var(--red);color:#fff}.p-m{background:var(--yellow);color:#14262B}.p-b{background:var(--chip);color:var(--fg)}
 td.num{font-variant-numeric:tabular-nums;text-align:right}
 @media (prefers-reduced-motion:no-preference){.fill{transition:width .4s ease}}
-nav.tabs a.adm{margin-left:auto;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:6px 12px;margin-block:8px;border-bottom-width:1px}
-nav.tabs a.adm:hover{color:var(--fg);border-color:var(--navy)}
+header.brand .wrap{position:relative}
+.admbtn{position:absolute;top:28px;right:max(16px,env(safe-area-inset-right,0px));display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-weight:700;font-size:13px;text-decoration:none;color:#fff;background:var(--navy);border-radius:6px;padding:10px 16px}
+.admbtn:hover{background:var(--red)}
+.admbtn:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+@media (max-width:620px){.admbtn{top:24px;padding:8px 12px}header.brand .logo{max-width:calc(100% - 110px)}header.brand .logo img{width:100%;height:auto}}
 </style>
 </head>
 <body>
 
 <header class="brand">
   <div class="wrap">
+    <a class="admbtn" href="admin.html" title="Área restrita: resultados, pré-plano de ação e dashboard"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Admin</a>
     <div class="logo"><img alt="Pacaembu Construtora" src="data:image/png;base64,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"></div>
     <h1>Diagnóstico BIM – Fase 01</h1>
     <p>Questionários para o levantamento de maturidade, tecnologia, processos e projetistas da implementação BIM nos loteamentos da Pacaembu. Conduzido pela CSBIM.</p>
@@ -248,7 +252,6 @@ function current(){const h=(location.hash||"").slice(1);return h==="respostas"&&
 function renderTabs(){
   const cur=current();
   const items=FORMS.map((f,i)=>`<a href="#${f.id}" ${cur===f.id?'aria-current="page"':''}><span class="n">${i+1}</span>${esc(f.nav)}${mine[f.id]?' <span class="done" aria-label="enviado">✓</span>':''}</a>`);
-  items.push(`<a href="admin.html" class="adm" title="Área restrita à equipe CSBIM"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Admin</a>`);
   if(isAdmin) items.push(`<a href="#respostas" ${cur==="respostas"?'aria-current="page"':''}>Respostas <span class="n">${allDocs.length}</span></a>`);
   $("#tabs").innerHTML=items.join("");
 }

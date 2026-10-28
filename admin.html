@@ -424,29 +424,30 @@ function csv(){
   const blob=new Blob(["\ufeff"+lines.join("\n")],{type:"text/csv;charset=utf-8"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="respostas_diagnostico_bim_fase01.csv";document.body.appendChild(a);a.click();a.remove();
 }
-async function load(key){
+async function load(email,key){
   $("#view").innerHTML=`<div class="empty">Carregando respostas…</div>`;
   try{
-    const r=await fetch(window.APPS_SCRIPT_URL+"?key="+encodeURIComponent(key));const j=await r.json();
-    if(!j.ok){try{sessionStorage.removeItem("adminKey")}catch(e){};login("Senha incorreta.");return}
-    try{sessionStorage.setItem("adminKey",key)}catch(e){}
+    const r=await fetch(window.APPS_SCRIPT_URL+"?email="+encodeURIComponent(email)+"&key="+encodeURIComponent(key));const j=await r.json();
+    if(!j.ok){try{sessionStorage.removeItem("adminAuth")}catch(e){};login("E-mail ou senha incorretos.");return}
+    try{sessionStorage.setItem("adminAuth",JSON.stringify([email,key]))}catch(e){}
     RAW=j.rows||[];allDocs=toDocs(RAW);render();
     const bar=document.createElement("div");bar.className="actions";
     bar.innerHTML=`<button class="primary" type="button" id="dl">Baixar respostas (Excel/CSV)</button><button class="ghost" type="button" id="rf">Atualizar</button><button class="ghost" type="button" id="out">Sair</button>`;
     let ab=document.getElementById("adminbar");if(!ab){ab=document.createElement("div");ab.id="adminbar";ab.className="wrap";ab.style.paddingTop="20px";$("main").prepend(ab)}ab.innerHTML="";ab.appendChild(bar);
-    $("#dl").onclick=csv;$("#rf").onclick=()=>load(key);$("#out").onclick=()=>{try{sessionStorage.removeItem("adminKey")}catch(e){};login()};
+    $("#dl").onclick=csv;$("#rf").onclick=()=>load(email,key);$("#out").onclick=()=>{try{sessionStorage.removeItem("adminAuth")}catch(e){};login()};
   }catch(e){$("#view").innerHTML=`<div class="notice">Não foi possível carregar as respostas. Confira o endereço em config.js e a internet.</div>`}
 }
 function login(msg){
   renderTabs();const ab0=document.getElementById("adminbar");if(ab0)ab0.remove();
   $("#view").innerHTML=`<div class="intro"><div class="eyebrow">Somente equipe CSBIM</div><h2>Área de admin</h2></div>
   ${!window.APPS_SCRIPT_URL?'<div class="notice">Configure o endereço do armazenamento em <code>config.js</code> (veja o README).</div>':''}
-  <form id="lg" class="section" novalidate><div class="q"><label for="pw">Senha de acesso</label><input id="pw" type="password" autocomplete="current-password"></div>
+  <p style="margin:-6px 0 0;color:var(--muted);max-width:60ch">Resultados, dashboard e pré-plano de ação do diagnóstico. Acesso restrito à equipe CSBIM.</p>
+  <form id="lg" class="section" novalidate><div class="q"><label for="em">E-mail</label><input id="em" type="email" autocomplete="username" inputmode="email"></div><div class="q"><label for="pw">Senha</label><input id="pw" type="password" autocomplete="current-password"></div>
   <div class="actions"><button class="primary" type="submit">Entrar</button><span class="status err">${msg||""}</span></div></form>`;
-  $("#lg").addEventListener("submit",e=>{e.preventDefault();const k=$("#pw").value.trim();if(k)load(k)});
+  $("#lg").addEventListener("submit",e=>{e.preventDefault();const m=$("#em").value.trim().toLowerCase(),k=$("#pw").value;if(m&&k)load(m,k)});
 }
-let k0=null;try{k0=sessionStorage.getItem("adminKey")}catch(e){}
-if(k0&&window.APPS_SCRIPT_URL)load(k0);else login();
+let a0=null;try{a0=JSON.parse(sessionStorage.getItem("adminAuth")||"null")}catch(e){}
+if(a0&&window.APPS_SCRIPT_URL)load(a0[0],a0[1]);else login();
 </script>
 </body>
 </html>
