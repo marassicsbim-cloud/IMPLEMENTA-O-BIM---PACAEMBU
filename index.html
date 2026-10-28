@@ -122,6 +122,8 @@ table.heat th:not(:first-child){text-align:center}
 .p-a{background:var(--red);color:#fff}.p-m{background:var(--yellow);color:#14262B}.p-b{background:var(--chip);color:var(--fg)}
 td.num{font-variant-numeric:tabular-nums;text-align:right}
 @media (prefers-reduced-motion:no-preference){.fill{transition:width .4s ease}}
+nav.tabs a.adm{margin-left:auto;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:6px 12px;margin-block:8px;border-bottom-width:1px}
+nav.tabs a.adm:hover{color:var(--fg);border-color:var(--navy)}
 </style>
 </head>
 <body>
@@ -246,6 +248,7 @@ function current(){const h=(location.hash||"").slice(1);return h==="respostas"&&
 function renderTabs(){
   const cur=current();
   const items=FORMS.map((f,i)=>`<a href="#${f.id}" ${cur===f.id?'aria-current="page"':''}><span class="n">${i+1}</span>${esc(f.nav)}${mine[f.id]?' <span class="done" aria-label="enviado">✓</span>':''}</a>`);
+  items.push(`<a href="admin.html" class="adm" title="Área restrita à equipe CSBIM"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Admin</a>`);
   if(isAdmin) items.push(`<a href="#respostas" ${cur==="respostas"?'aria-current="page"':''}>Respostas <span class="n">${allDocs.length}</span></a>`);
   $("#tabs").innerHTML=items.join("");
 }
