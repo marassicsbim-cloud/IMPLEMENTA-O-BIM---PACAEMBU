@@ -291,9 +291,9 @@ function renderForm(f){
    <form id="frm" novalidate><fieldset>
     ${f.sections.map(s=>`<section class="section"><h3>${esc(s.t)}${s.qs.some(q=>q.type==="scale")?' <small>escala de 1 a 5</small>':''}</h3>${s.qs.map(q=>qHTML(q,f.id,vals[q.id])).join("")}</section>`).join("")}
    </fieldset>
-   <div class="actions" style="margin-top:20px"><button class="primary" type="submit" id="send" ${!window.APPS_SCRIPT_URL?'disabled':''}>Enviar respostas</button><span class="status" id="st" role="status" aria-live="polite"></span></div>
+   <div class="actions" style="margin-top:20px"><button class="primary" type="submit" id="send" ${!window.APPS_SCRIPT_URL?'disabled':''}>Enviar e encaminhar</button><span class="status" id="st" role="status" aria-live="polite"></span></div>
    </form>
-   <footer>As respostas são vistas apenas pela equipe da CSBIM responsável pelo diagnóstico.</footer>`;
+   <footer>Ao enviar, suas respostas são salvas e uma cópia em PDF é encaminhada à equipe CSBIM responsável pelo diagnóstico.</footer>`;
   const frm=$("#frm");
   let t=null;
   frm.addEventListener("input",()=>{clearTimeout(t);t=setTimeout(()=>store.set("draft-"+f.id,collect(f)),400)});
@@ -315,12 +315,13 @@ async function submit(f){
   if(!window.APPS_SCRIPT_URL){st.className="status err";st.textContent="Formulário ainda não conectado ao armazenamento.";return}
   btn.disabled=true;st.className="status";st.textContent="Enviando…";
   const perguntas={};f.sections.forEach(s=>s.qs.forEach(q=>perguntas[q.id]=q.l));
-  const payload={form:f.id,titulo:f.title,nome:ans.nome||"",area:ans.area||"",empresa:ans.empresa||"",respostas:ans,perguntas,enviadoEm:new Date().toISOString()};
+  const secoes=f.sections.map(s=>({t:s.t,qs:s.qs.map(q=>q.id)}));
+  const payload={form:f.id,titulo:f.title,nome:ans.nome||"",area:ans.area||"",empresa:ans.empresa||"",respostas:ans,perguntas,secoes,enviadoEm:new Date().toISOString()};
   try{
     await fetch(window.APPS_SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});
     store.set("draft-"+f.id,null);
     mine[f.id]={respostas:ans,enviadoEm:payload.enviadoEm};store.set("enviados",mine);
-    st.className="status ok";st.textContent="Respostas enviadas. Obrigado!";renderTabs();
+    st.className="status ok";st.textContent="Respostas enviadas e encaminhadas em PDF para a equipe CSBIM. Obrigado!";renderTabs();
   }catch(e){st.className="status err";st.textContent="Não foi possível enviar agora. Verifique a internet e tente novamente."}
   finally{btn.disabled=false}
 }
