@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Admin · Diagnóstico BIM Pacaembu</title>
-<script src="config.js"></script>
+<script>window.APPS_SCRIPT_URL="https://script.google.com/macros/s/AKfycbxXPlDOWhdaNddGyOPYZvrfeENNzLo0SkHemFaqlz8W0QvE6BbVLZoN7fVkcr8ipKyYZQ/exec";</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600&display=swap">
 <style>
@@ -126,14 +126,20 @@ table.heat th:not(:first-child){text-align:center}
 td.num{font-variant-numeric:tabular-nums;text-align:right}
 @media (prefers-reduced-motion:no-preference){.fill{transition:width .4s ease}}
 #plexus{position:fixed;inset:0;z-index:0;pointer-events:none}header.brand{background:transparent!important;position:relative;z-index:1}main,footer{position:relative;z-index:1}
-</style>
+.trash{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--muted);cursor:pointer}.trash:hover{color:#fff;background:var(--red);border-color:var(--red)}.cf{font-size:12px;font-weight:600;color:var(--red);margin-right:6px}.cfy,.cfn{font-size:12px;padding:5px 10px;border-radius:5px;margin-left:4px;cursor:pointer}.cfy{background:var(--red);color:#fff;border:0}.cfn{background:transparent;border:1px solid var(--line);color:var(--fg)}details summary .act{margin-top:-4px}</style>
 <meta name="robots" content="noindex">
 </head>
 <body><canvas id="plexus" aria-hidden="true"></canvas>
-<script>(function(){var c=document.getElementById("plexus");if(!c||!c.getContext)return;var x=c.getContext("2d"),R=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches,W,H,P=[],dpr=Math.min(2,window.devicePixelRatio||1);
-function size(){W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;c.style.width=W+"px";c.style.height=H+"px";x.setTransform(dpr,0,0,dpr,0,0);var n=Math.round(Math.max(24,Math.min(80,W*H/24000)));P=[];for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,r:Math.random()*1.5+1.2})}
-function draw(){x.clearRect(0,0,W,H);for(var i=0;i<P.length;i++){var a=P[i];if(!R){a.x+=a.vx;a.y+=a.vy;if(a.x<0||a.x>W)a.vx*=-1;if(a.y<0||a.y>H)a.vy*=-1}for(var j=i+1;j<P.length;j++){var b=P[j],d=Math.hypot(a.x-b.x,a.y-b.y);if(d<150){x.strokeStyle="rgba(0,61,76,"+(0.13*(1-d/150))+")";x.lineWidth=1;x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke()}}x.fillStyle=i%9===0?"rgba(228,0,43,.32)":(i%11===0?"rgba(255,184,28,.45)":"rgba(0,61,76,.26)");x.beginPath();x.arc(a.x,a.y,a.r,0,6.3);x.fill()}if(!R)requestAnimationFrame(draw)}
-addEventListener("resize",function(){size();if(R)draw()});size();draw()})();</script>
+<script>(function(){var c=document.getElementById("plexus");if(!c||!c.getContext)return;var x=c.getContext("2d");
+var RED=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches,SPEED=RED?8:18,LINK=150,W,H,P=[],dpr=Math.min(1.5,window.devicePixelRatio||1),last=0;
+function size(){W=innerWidth;H=innerHeight;c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);c.style.width=W+"px";c.style.height=H+"px";x.setTransform(dpr,0,0,dpr,0,0);var n=Math.round(Math.max(22,Math.min(60,W*H/30000)));if(P.length===n)return;P=[];for(var i=0;i<n;i++){var a=Math.random()*6.283;P.push({x:Math.random()*W,y:Math.random()*H,vx:Math.cos(a),vy:Math.sin(a),r:Math.random()*1.4+1.3,k:i%9===0?1:(i%11===0?2:0)})}}
+var COL=["rgba(0,61,76,.32)","rgba(228,0,43,.45)","rgba(255,184,28,.6)"];
+function frame(t){var dt=last?Math.min(.05,(t-last)/1000):0;last=t;x.clearRect(0,0,W,H);
+for(var i=0;i<P.length;i++){var a=P[i];a.x+=a.vx*SPEED*dt;a.y+=a.vy*SPEED*dt;if(a.x<-20)a.x=W+20;else if(a.x>W+20)a.x=-20;if(a.y<-20)a.y=H+20;else if(a.y>H+20)a.y=-20}
+x.lineWidth=1;for(var s=0;s<3;s++){x.beginPath();var lo=LINK*s/3,hi=LINK*(s+1)/3;for(var i=0;i<P.length;i++){var a=P[i];for(var j=i+1;j<P.length;j++){var b=P[j],dx=a.x-b.x,dy=a.y-b.y,d=dx*dx+dy*dy;if(d>=lo*lo&&d<hi*hi){x.moveTo(a.x,a.y);x.lineTo(b.x,b.y)}}}x.strokeStyle="rgba(0,61,76,"+[.16,.1,.05][s]+")";x.stroke()}
+for(var k=0;k<3;k++){x.beginPath();for(var i=0;i<P.length;i++){var a=P[i];if(a.k!==k)continue;x.moveTo(a.x+a.r,a.y);x.arc(a.x,a.y,a.r,0,6.283)}x.fillStyle=COL[k];x.fill()}
+requestAnimationFrame(frame)}
+addEventListener("resize",size);document.addEventListener("visibilitychange",function(){last=0});size();requestAnimationFrame(frame)})();</script>
 
 
 <header class="brand">
@@ -413,7 +419,7 @@ function renderResults(){
    ${rows.length?`<div class="tbl"><table><thead><tr><th>Nome</th><th>Área / empresa</th><th>Questionários</th><th>Atualizado</th></tr></thead><tbody>
     ${rows.map(d=>`<tr data-id="${esc(d._id||"")}"><td>${esc(d.nome||"—")}</td><td>${esc(d.empresa||d.area||"—")}</td><td>${FORMS.map(f=>`<span class="pill ${d.forms?.[f.id]?'on':''}">${esc(f.nav)}</span>`).join("")}</td><td>${d.atualizadoEm?new Date(d.atualizadoEm).toLocaleDateString("pt-BR"):"—"}</td></tr>`).join("")}
    </tbody></table></div>
-   ${showSample?'':`<div style="display:flex;flex-direction:column;gap:10px">${rows.map(d=>`<details><summary>${esc(d.nome||"Sem nome")} ${d.empresa?'· '+esc(d.empresa):''}</summary><dl>${FORMS.filter(f=>d.forms?.[f.id]).map(f=>{const r=d.forms[f.id].respostas||{};return `<dt style="color:var(--red);font-weight:700;font-family:var(--display)">${esc(f.title)}</dt>`+f.sections.flatMap(s=>s.qs).map(q=>{const v=r[q.id];const t=Array.isArray(v)?v.join(", "):(v??"");return t===""||t===null?"":`<dt>${esc(q.l)}</dt><dd>${esc(t)}</dd>`}).join("")}).join("")}</dl></details>`).join("")}</div>`}`
+   ${showSample?'':`<div style="display:flex;flex-direction:column;gap:10px">${rows.map(d=>`<details data-id="${esc(d._id||"")}"><summary>${esc(d.nome||"Sem nome")} ${d.empresa?'· '+esc(d.empresa):''}</summary><dl>${FORMS.filter(f=>d.forms?.[f.id]).map(f=>{const r=d.forms[f.id].respostas||{};return `<dt style="color:var(--red);font-weight:700;font-family:var(--display)">${esc(f.title)}</dt>`+f.sections.flatMap(s=>s.qs).map(q=>{const v=r[q.id];const t=Array.isArray(v)?v.join(", "):(v??"");return t===""||t===null?"":`<dt>${esc(q.l)}</dt><dd>${esc(t)}</dd>`}).join("")}).join("")}</dl></details>`).join("")}</div>`}`
    :`<div class="empty">Nenhuma resposta ainda. Compartilhe o link desta página com a equipe e os projetistas.</div>`}`;
   $("#toggleSample").addEventListener("click",()=>{showSample=!showSample;renderResults()});
 }
@@ -427,25 +433,26 @@ function toDocs(rows){return rows.map(r=>({_id:r.enviadoEm,nome:r.nome,area:r.ar
 let RAW=[],AUTH=null;
 const _rr=renderResults;
 renderResults=function(){_rr();decorate()};
+const TRASH='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
+function trashCtl(id,box){
+  const show=()=>{box.innerHTML=`<button type="button" class="trash" title="Excluir esta resposta" aria-label="Excluir esta resposta">${TRASH}</button>`;box.querySelector("button").onclick=e=>{e.preventDefault();e.stopPropagation();ask()}};
+  const ask=()=>{box.innerHTML='<span class="cf">Excluir?</span><button type="button" class="cfy">Sim</button><button type="button" class="cfn">Não</button>';box.querySelector(".cfy").onclick=e=>{e.preventDefault();e.stopPropagation();del(id,box)};box.querySelector(".cfn").onclick=e=>{e.preventDefault();e.stopPropagation();show()}};
+  show();
+}
 function decorate(){
   if(showSample||!AUTH)return;
-  const tb=document.querySelector("#view table:not(.heat):not(.plan)");if(!tb)return;
-  const hr=tb.querySelector("thead tr");if(hr&&!hr.querySelector(".act"))hr.insertAdjacentHTML("beforeend",'<th class="act">Ações</th>');
-  tb.querySelectorAll("tbody tr[data-id]").forEach(tr=>{
-    const id=tr.getAttribute("data-id");if(!id||tr.querySelector(".act"))return;
-    const td=document.createElement("td");td.className="act";
-    const show=()=>{td.innerHTML='<button type="button" class="ghost del" style="padding:6px 12px;font-size:12px">Excluir</button>';td.querySelector("button").onclick=ask};
-    const ask=()=>{td.innerHTML='<span style="font-size:12px;color:var(--red);font-weight:600">Excluir esta resposta?</span><div style="display:flex;gap:6px;margin-top:6px"><button type="button" class="primary" style="padding:6px 12px;font-size:12px">Sim, excluir</button><button type="button" class="ghost" style="padding:6px 12px;font-size:12px">Cancelar</button></div>';const b=td.querySelectorAll("button");b[0].onclick=()=>del(id,td);b[1].onclick=show};
-    show();tr.appendChild(td);
-  });
+  const tb=document.querySelector("#view table:not(.heat):not(.plan)");
+  if(tb){const hr=tb.querySelector("thead tr");if(hr&&!hr.querySelector(".act"))hr.insertAdjacentHTML("beforeend",'<th class="act" style="width:1%;white-space:nowrap">Excluir</th>');
+    tb.querySelectorAll("tbody tr[data-id]").forEach(tr=>{const id=tr.getAttribute("data-id");if(!id||tr.querySelector(".act"))return;const td=document.createElement("td");td.className="act";tr.appendChild(td);trashCtl(id,td)});}
+  document.querySelectorAll("#view details[data-id]").forEach(d=>{const id=d.getAttribute("data-id"),sm=d.querySelector("summary");if(!id||!sm||sm.querySelector(".act"))return;const sp=document.createElement("span");sp.className="act";sp.style.float="right";sm.appendChild(sp);trashCtl(id,sp)});
 }
 async function del(id,td){
-  td.innerHTML='<span style="font-size:12px;color:var(--muted)">Excluindo…</span>';
+  td.innerHTML='<span class="cf" style="color:var(--muted)">Excluindo…</span>';
   try{
     const r=await fetch(window.APPS_SCRIPT_URL+"?action=delete&email="+encodeURIComponent(AUTH[0])+"&key="+encodeURIComponent(AUTH[1])+"&ts="+encodeURIComponent(id));
     const j=await r.json();
-    if(j.ok){load(AUTH[0],AUTH[1])}else{td.innerHTML='<span style="font-size:12px;color:var(--red)">Não encontrada. Clique em Atualizar.</span>'}
-  }catch(e){td.innerHTML='<span style="font-size:12px;color:var(--red)">Falha ao excluir. Tente de novo.</span>'}
+    if(j.ok){load(AUTH[0],AUTH[1])}else{td.innerHTML='<span class="cf">Não encontrada. Clique em Atualizar.</span>'}
+  }catch(e){td.innerHTML='<span class="cf">Falha ao excluir. Tente de novo.</span>'}
 }
 function csv(){
   const cols=["Data","Questionário","Nome","Área","Empresa"];const qmap=[];
