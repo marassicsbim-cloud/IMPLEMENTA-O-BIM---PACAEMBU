@@ -1,45 +1,85 @@
-# Diagnóstico BIM – Fase 01 · Pacaembu
+# IPM26 – Formulário de confirmação
 
-Formulário dinâmico da Fase 01 (Maturidade BIM, Tecnologia, Processos e Projetistas), publicado no GitHub Pages, com respostas salvas, e-mail a cada envio e área de admin.
+Site do formulário de confirmação de presença do IPM26 (13 e 14/11/2026), com painel administrativo.
 
-- **`index.html`** – o questionário, com as cores e a logo da Pacaembu.
-- **`admin.html`** – área de admin com senha: gráficos, pré-plano de ação, respostas completas e download em Excel/CSV.
-- **`config.js`** – onde vai o endereço do armazenamento.
-- **`apps-script/Codigo.gs`** – o “servidor”: salva cada resposta numa Planilha Google e manda e-mail para marassi.gabriel@csbim.eng.br.
-- **`docs/`** – as perguntas em PDF.
+| Arquivo | Para que serve |
+|---|---|
+| `index.html` | O site: boas-vindas, formulário, painel administrativo |
+| `config.js` | Onde fica a URL do servidor (Google Apps Script) |
+| `apps-script/Code.gs` | O servidor: grava as respostas na planilha, envia o e-mail com PDF e alimenta o painel |
 
-O GitHub Pages só hospeda páginas; ele não guarda dados. Por isso as respostas vão para uma Planilha Google (gratuita), através do script.
+---
 
-## 1. Publicar no GitHub (5 min)
+## Parte 1 – Criar o servidor no Google (cerca de 10 min)
 
-1. No repositório: **Add file › Upload files** e envie esta pasta.
-2. **Settings › Pages** › Branch `main`, pasta `/ (root)` › **Save**.
-3. O formulário fica em `https://<usuario>.github.io/<repositorio>/diagnostico-fase01/` e a admin em `…/diagnostico-fase01/admin.html`.
+O servidor roda de graça no Google, dentro de uma planilha. Use a conta Google que vai **enviar** os e-mails.
 
-## 2. Ligar o armazenamento e o e-mail (10 min, uma vez)
+1. Acesse [sheets.new](https://sheets.new) e crie uma planilha chamada **IPM26 Respostas**.
+2. No menu, clique em **Extensões → Apps Script**.
+3. Apague o conteúdo do arquivo `Código.gs` e cole todo o conteúdo de `apps-script/Code.gs`.
+4. Confira no topo do código o login, a senha, o destinatário (PARA) e a cópia (COPIA) dos e-mails. Clique em **Salvar** (ícone de disquete).
+5. No seletor de funções (ao lado de **Depurar**), escolha `testarEmail` e clique em **Executar**.
+   - O Google vai pedir autorização: **Revisar permissões → escolha a conta → Avançado → Acessar IPM26 (não seguro) → Permitir**.
+   - O destinatário e a cópia devem receber um e-mail de teste com o PDF anexado. Rode também `testarChecklist`.
+6. Clique em **Implantar → Nova implantação**.
+   - Em **Selecionar tipo** (engrenagem), escolha **App da Web**.
+   - **Executar como:** Eu.
+   - **Quem pode acessar:** Qualquer pessoa.
+   - Clique em **Implantar** e copie a **URL do app da Web** (termina em `/exec`).
 
-1. Entre numa conta Google e crie uma **Planilha** nova (ex.: “Respostas Diagnóstico BIM”).
-2. Na planilha: **Extensões › Apps Script**. Apague o conteúdo e cole o arquivo `apps-script/Codigo.gs`. Salve.
-3. **Configurações do projeto** (engrenagem) › **Propriedades do script** › adicione duas propriedades:
-   - `ADMIN_EMAIL` = o e-mail que entra na área de admin
-   - `ADMIN_KEY` = a senha da área de admin
-4. **Implantar › Nova implantação** › tipo **App da Web**:
-   - Executar como: **Eu**
-   - Quem pode acessar: **Qualquer pessoa**
-   - **Implantar** e autorize o acesso (planilha e Gmail).
-5. Copie o **URL do app da Web** (termina em `/exec`).
-6. No GitHub, edite `config.js` (ícone de lápis) e cole o URL entre as aspas. **Commit**.
+## Parte 2 – Colocar o site no ar com o GitHub Pages
 
-Pronto: cada envio cria uma linha na aba **Respostas** da planilha e um e-mail para o Gabriel.
+1. Crie uma conta em [github.com](https://github.com) (ou entre na conta da CSBIM).
+2. Clique em **+ → New repository**.
+   - **Repository name:** `ipm26`
+   - Marque **Public** (o GitHub Pages gratuito exige repositório público).
+   - Clique em **Create repository**.
+3. Na página do repositório, clique em **uploading an existing file**.
+4. Arraste `index.html`, `config.js` e `README.md`. Não envie a pasta `apps-script` (ela já está no Google).
+5. Clique em **Commit changes**.
+6. Vá em **Settings → Pages**.
+   - Em **Source**, escolha **Deploy from a branch**.
+   - Em **Branch**, escolha **main** e a pasta **/ (root)**. Clique em **Save**.
+7. Aguarde 1 a 2 minutos e atualize a página. O endereço aparece no topo:
+   `https://SEU-USUARIO.github.io/ipm26/`
 
-## 3. Usar
+## Parte 3 – Ligar o site ao servidor
 
-- Divulgue o link do `index.html` (pode ir numa guia **Site** do Teams).
-- Acompanhe pelo botão **Admin** (canto superior direito do formulário), com e-mail e senha, ou direto na planilha.
-- Para o relatório final: **Baixar respostas (Excel/CSV)** no admin.
+1. No repositório, abra `config.js` e clique no lápis (**Edit this file**).
+2. Cole a URL copiada na Parte 1 entre as aspas:
 
-## Observações
+   ```js
+   window.IPM_CONFIG = {
+     API_URL: "https://script.google.com/macros/s/AKfycb.../exec"
+   };
+   ```
 
-- Alterou o `Codigo.gs`? **Implantar › Gerenciar implantações › Editar › Nova versão**, para valer.
-- O e-mail e a senha do admin ficam só nas Propriedades do script, nunca no GitHub.
-- O e-mail sai da conta Google usada na planilha (limite gratuito de 100 e-mails por dia).
+3. Clique em **Commit changes**. Em cerca de 1 minuto o site já usa o servidor.
+
+## Parte 4 – Testar
+
+1. Abra o site, clique em **Vamos juntos descobrir o propósito** e envie uma resposta de teste.
+2. Confira se a linha apareceu na planilha **IPM26 Respostas**, aba **Respostas**.
+3. Confira se o destinatário e a cópia receberam a ficha em PDF.
+4. Abra `https://SEU-USUARIO.github.io/ipm26/#admin` (ou clique em **Área administrativa**), entre com o login e a senha e veja o painel. Teste **Exportar Excel completo**.
+5. Apague a linha de teste da planilha antes de divulgar o link.
+
+---
+
+## Endereço próprio (opcional)
+
+Para usar algo como `ipm26.csbim.eng.br`:
+
+1. No provedor do domínio, crie um registro **CNAME** `ipm26` apontando para `SEU-USUARIO.github.io`.
+2. No GitHub, em **Settings → Pages → Custom domain**, digite `ipm26.csbim.eng.br`, salve e marque **Enforce HTTPS** quando ficar disponível.
+
+## Alterar o servidor depois
+
+Se mudar algo no `Code.gs` (destinatários, senha), salve e faça **Implantar → Gerenciar implantações → lápis → Versão: Nova versão → Implantar**. Assim a URL continua a mesma e não é preciso mexer no `config.js`.
+
+## Bom saber
+
+- **Senha:** o login do painel é conferido no Google, não no site. O código do site é público no GitHub, mas a senha e as respostas não aparecem nele.
+- **Limite de e-mails do Google:** cada e-mail vai para 2 pessoas (destinatário + cópia) e conta como 2 envios. Conta Gmail gratuita: até 100 destinatários por dia, ou seja, cerca de **50 e-mails por dia** (respostas + conferências). Conta Google Workspace: até 1.500 por dia. Acima do limite, a resposta continua sendo gravada na planilha; só o e-mail daquele dia deixa de sair.
+- **LGPD:** as respostas ficam na planilha do Google Drive da conta usada na Parte 1. Compartilhe essa planilha só com quem precisa.
+- **Painel:** atualiza sozinho a cada minuto enquanto estiver aberto, e também pelo botão **Atualizar**.
