@@ -182,6 +182,13 @@ table.heat2 th:not(:first-child),table.heat2 td.tl{text-align:center}
 table.heat2 td.tl{border:2px solid var(--surface)}table.heat2 td.tl b{display:block;font-family:var(--display);font-size:16px}table.heat2 td.tl small{font-size:11.5px;font-weight:600}
 td.tl.crit{background:#FBE0E5;color:#9E0020}td.tl.aten{background:#FFF1CC;color:#6B4E00}td.tl.bom{background:#DCE8EB;color:#003D4C}
 @media (max-width:520px){.lb{grid-template-columns:minmax(0,1fr) auto;row-gap:4px}.lb .lb-l{grid-column:1/-1}.lb .lt{grid-column:1}.lax{grid-template-columns:minmax(0,1fr) auto}.lax>i:first-child{display:none}}
+.areas{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.area{border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.area-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.area-h b{font-family:var(--display);font-size:16px;color:var(--navy)}.area-h small{color:var(--muted);font-size:13px}
+.ar{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) 40px;gap:10px;align-items:center;font-size:13.5px}
+.ar b{font-family:var(--display);text-align:right;font-variant-numeric:tabular-nums}
+.ar .lt{height:12px}
+.area-f{margin:2px 0 0;font-size:13.5px;line-height:1.4;border-top:1px solid var(--line);padding-top:8px}
 </style>
 <meta name="robots" content="noindex">
 </head>
@@ -468,6 +475,7 @@ function donutChart(entries,total,unit,order){
 }
 
 /* ===== Leitura simples: nível de 0% a 100% e semáforo ===== */
+const DNOME={Pessoas:"Conhecimento",Processos:"Processos",Tecnologia:"Ferramentas"};
 const NOME={p1:"Conhecimento dos conceitos BIM",p2:"Prática com Civil 3D",p3:"Prática com compatibilização (Navisworks)",p4:"Abrir e consultar modelos 3D / IFC",p5:"Interesse em aprender BIM",
  r1:"Padrão de entrega dos projetos",r2:"Interferências resolvidas antes da obra",r3:"Quantitativos confiáveis",r4:"Planejamento ligado aos projetos",r5:"Clareza da versão vigente",
  t1:"Arquivos em local centralizado",t2:"Computadores adequados",t3:"Troca de arquivos com projetistas"};
@@ -508,7 +516,7 @@ function renderResults(){
 function viewPacaembu(S){
   const mat=S.mat.map(x=>x.r), pro=S.pro.map(x=>x.r), tec=S.tec.map(x=>x.r);
   const scaleQs=FORMS[0].sections.flatMap(s=>s.qs).filter(q=>q.type==="scale");
-  const dimAvg=DIMS.map(dm=>({label:dm,v:avg(mat.flatMap(r=>scaleQs.filter(q=>q.dim===dm).map(q=>r[q.id]))),n:mat.length})).filter(x=>x.v!=null);
+  const dimAvg=DIMS.map(dm=>({label:DNOME[dm],v:avg(mat.flatMap(r=>scaleQs.filter(q=>q.dim===dm).map(q=>r[q.id]))),n:mat.length})).filter(x=>x.v!=null);
   const perQ=scaleQs.map(q=>({id:q.id,label:NOME[q.id]||q.l.replace(/\.$/,""),full:q.l,v:avg(mat.map(r=>r[q.id])),n:mat.filter(r=>typeof r[q.id]==="number").length})).filter(x=>x.v!=null).sort((a,b)=>a.v-b.v);
   const areas=[...new Set(mat.map(r=>r.area).filter(Boolean))];
   const heat=areas.map(a=>({a,n:mat.filter(r=>r.area===a).length,vals:DIMS.map(dm=>avg(mat.filter(r=>r.area===a).flatMap(r=>scaleQs.filter(q=>q.dim===dm).map(q=>r[q.id]))))})).sort((x,y)=>y.n-x.n);
@@ -533,7 +541,7 @@ function viewPacaembu(S){
 
    <div class="grid2">${chartCard("1. Nível geral da equipe",`${mat.length} pessoas`, dimAvg.length?vbars(dimAvg):`<div class="empty">Sem respostas de maturidade.</div>`,"Quanto mais alta a coluna, mais preparada a equipe está naquele tema.")}${chartCard("Quem respondeu, por área",`${mat.length} pessoas`,donutChart(tally(mat,"area"),mat.length,"pessoas"))}</div>
    ${chartCard("2. Item por item, do mais crítico para o melhor","", perQ.length?levelBars(perQ):`<div class="empty">Sem respostas.</div>`,"Os primeiros da lista são onde a implantação do BIM deve começar.")}
-   ${chartCard("3. Nível por área","entre parênteses, quantas pessoas responderam", heat.length?`<div class="tbl"><table class="heat2"><thead><tr><th>Área</th>${DIMS.map(d=>`<th>${d}</th>`).join("")}</tr></thead><tbody>${heat.map(h=>`<tr><td><b>${esc(h.a)}</b> <small class="muted">(${h.n} pessoa${h.n===1?'':'s'})</small></td>${h.vals.map((v,i)=>{if(v==null)return '<td>–</td>';const p=lvl(v),x=stat(p);return `<td class="tl ${x.k}" title="${esc(h.a)} · ${DIMS[i]}: ${p}% (${x.t})"><b>${p}%</b><small>${x.t}</small></td>`}).join("")}</tr>`).join("")}</tbody></table></div>`:`<div class="empty">Sem áreas preenchidas.</div>`,"Áreas com 1 ou 2 pessoas mostram a opinião de poucos: leia com cuidado.")}
+   ${chartCard("3. Nível por área","cada cartão é uma área da Pacaembu", heat.length?`<div class="areas">${heat.map(h=>{const lst=h.vals.map((v,i)=>({d:DNOME[DIMS[i]],p:lvl(v)})).filter(x=>x.p!=null);const pior=lst.slice().sort((a,b)=>a.p-b.p)[0];return `<div class="area"><div class="area-h"><b>${esc(h.a)}</b><small>${h.n} pessoa${h.n===1?'':'s'}</small></div>${lst.map(x=>{const t=stat(x.p);return `<div class="ar"><span>${esc(x.d)}</span><div class="lt"><div class="lf ${t.k}" style="width:${Math.max(2,x.p)}%"></div></div><b>${x.p}%</b></div>`}).join("")}<p class="area-f">${pior&&pior.p<60?`Precisa de mais apoio em <b>${esc(pior.d.toLowerCase())}</b>.`:`Está bem nos três temas.`}${h.n<=2?` <span class="muted">Poucas respostas: opinião de ${h.n===1?'uma pessoa':'duas pessoas'}.</span>`:''}</p></div>`}).join("")}</div>`:`<div class="empty">Sem áreas preenchidas.</div>`,"Cores: vermelho = crítico · amarelo = atenção · azul = bom.")}
 
    <div class="grid2">
    ${chartCard("4. Usos BIM que mais ajudariam",`${pro.length} pessoa${pro.length===1?'':'s'} · Processos`,countBars(usos,pro.length,"pessoas"),"Cada pessoa podia marcar vários usos.")}
