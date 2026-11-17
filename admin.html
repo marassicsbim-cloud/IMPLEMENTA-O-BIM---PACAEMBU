@@ -47,7 +47,7 @@ h2{font-family:var(--display);font-weight:700;font-size:24px;margin:0;line-heigh
 .meta span{background:var(--chip);border-radius:4px;padding:2px 8px}
 fieldset{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:18px}
 .section{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:18px}
-.section h3{font-family:var(--display);font-size:15px;font-weight:700;margin:0;color:var(--accent);display:flex;gap:10px;align-items:baseline}
+.section h3{font-family:var(--display);font-size:15px;font-weight:700;margin:0;color:var(--accent);display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline}
 .section h3 small{font-family:var(--body);font-weight:400;color:var(--muted);font-size:13px}
 .q{display:flex;flex-direction:column;gap:8px}
 .q>label,.q>.lbl{font-weight:600}
@@ -131,6 +131,41 @@ td.num{font-variant-numeric:tabular-nums;text-align:right}
 .admbtn:hover{background:var(--red)}
 .admbtn:focus-visible{outline:2px solid var(--red);outline-offset:2px}
 @media (max-width:620px){.admbtn{top:24px;padding:8px 12px}header.brand .logo{max-width:calc(100% - 110px)}header.brand .logo img{width:100%;height:auto}}
+.segs{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.seg{font:inherit;font-family:var(--display);font-weight:700;font-size:14px;padding:12px 20px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.seg.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.card.dark{background:var(--navy);border-color:var(--navy)}.card.dark b,.card.dark small{color:#fff}
+.card.red b{color:var(--red)}
+.lead{margin:0;padding:14px 18px;background:var(--surface-2);border-left:4px solid var(--red);border-radius:6px;font-size:15px;max-width:none}
+.facts{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.tag{display:inline-block;font-size:12px;border-radius:10px;padding:2px 9px;background:var(--surface-2);color:var(--fg);white-space:nowrap}
+.tag.g{background:#DDEFE6;color:#1C5A3C;font-weight:600}.tag.b{background:#FBE0E5;color:#9E0020;font-weight:600}
+table.info td{vertical-align:middle}
+table.info .tag{white-space:normal}
+.hbars.cnt .hb{grid-template-columns:minmax(130px,1.3fr) minmax(60px,1fr) 78px}.hbars.cnt .hb-l{overflow-wrap:normal}
+.chart{container-type:inline-size}
+.donut{display:grid;grid-template-columns:112px minmax(0,1fr);gap:14px;align-items:center}
+.donut svg{width:112px;height:112px}
+.donut .dn{font-family:var(--display);font-weight:800;font-size:30px;fill:var(--fg)}
+.donut .du{font-size:12px;fill:var(--muted)}
+.legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.legend li{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:8px;align-items:center;line-height:1.25}
+.legend span{min-width:0;overflow-wrap:break-word}
+.legend b{text-align:right;white-space:nowrap}.legend b small{font-weight:400;color:var(--muted);font-size:12px}
+.legend i{width:12px;height:12px;border-radius:3px}
+.legend b{font-variant-numeric:tabular-nums}
+.vbars{display:flex;gap:28px;align-items:flex-end;justify-content:space-around;height:230px;padding-top:6px}
+.vb{flex:1;max-width:110px;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%}
+.vb b{font-family:var(--display);font-size:20px;font-variant-numeric:tabular-nums}
+.vt{position:relative;flex:1;width:56px;background:var(--surface-2);border-radius:6px 6px 0 0;display:flex;align-items:flex-end;overflow:visible}
+.vf{width:100%;background:var(--accent);border-radius:6px 6px 0 0}.vf.low{background:var(--red)}
+.vref{position:absolute;left:-10px;right:-10px;bottom:50%;border-top:2px dashed var(--muted)}
+.vb span{font-size:13px;color:var(--muted);font-family:var(--display);font-weight:600}
+@container (max-width:300px){.donut{grid-template-columns:1fr;justify-items:center}.donut .legend{width:100%}}
+@media (max-width:520px){.section h3{display:block}.section h3 small{display:block;margin-top:2px}.ax .t{display:none}.vbars{gap:14px}
+.hbars .hb,.hbars.cnt .hb{grid-template-columns:minmax(0,1fr) 84px;row-gap:4px}.hbars .hb-l{grid-column:1/-1}
+.scored+.axisnote,.cnt+.axisnote{grid-template-columns:minmax(0,1fr) 84px}.scored+.axisnote>span:first-child{display:none}}
+details dd{overflow-wrap:anywhere}
 </style>
 <meta name="robots" content="noindex">
 </head>
@@ -366,75 +401,197 @@ function tally(list,key){const m={};list.forEach(r=>{const v=r?.[key];(Array.isA
 function countBars(entries,total,unit){
   if(!entries.length) return `<div class="empty">Sem respostas ainda.</div>`;
   const pct=v=>total?Math.round(v/total*100):0;
-  return `<div class="hbars cnt">${entries.map(([k,v])=>`<div class="hb" title="${esc(k)}: ${v} de ${total} ${unit} (${pct(v)}%)"><span class="hb-l">${esc(k)}</span><div class="track grid4"><div class="fill" style="width:${pct(v)}%"></div></div><b>${v} <small>· ${pct(v)}%</small></b></div>`).join("")}</div><div class="axisnote cnt"><span></span><div class="ax"><span>0%</span><span class="m">50%</span><span class="e">100% de ${total} ${unit}</span></div><span></span></div>`;
+  return `<div class="hbars cnt">${entries.map(([k,v])=>`<div class="hb" title="${esc(k)}: ${v} de ${total} ${unit} (${pct(v)}%)"><span class="hb-l">${esc(k)}</span><div class="track grid4"><div class="fill" style="width:${pct(v)}%"></div></div><b>${v} <small>· ${pct(v)}%</small></b></div>`).join("")}</div><p class="cnote" style="margin-top:2px">Percentual sobre ${total} ${unit}.</p>`;
 }
 function scoreBars(items){
   const f2=v=>v.toFixed(2).replace(".",",");
   return `<div class="hbars scored">${items.map(it=>`<div class="hb" title="${esc(it.full||it.label)}: média ${f2(it.v)} de 5 · ${it.n} resposta${it.n===1?'':'s'}"><span class="hb-l">${esc(it.label)}</span><div class="track grid4"><div class="fill ${it.v<3?'low':''}" style="width:${Math.max(1.5,(it.v-1)/4*100).toFixed(1)}%"></div><i class="ref" aria-hidden="true"></i></div><b>${f2(it.v)} <small>n=${it.n}</small></b></div>`).join("")}</div><div class="axisnote"><span></span><div class="ax"><span style="left:0">1</span><span class="t" style="left:25%">2</span><span class="m" style="left:50%">3 · meta</span><span class="t" style="left:75%">4</span><span class="e">5</span></div><span></span></div>`;
 }
 function chartCard(title,sub,body,note){return `<section class="section chart"><h3>${esc(title)}${sub?` <small>${esc(sub)}</small>`:''}</h3>${body}${note?`<p class="cnote">${note}</p>`:''}</section>`}
+/* ===== Interpretação dos dados (somente leitura; a planilha não é alterada) ===== */
+const norm=s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/^(eng|arq|engo|enga)\.?\s+/,"").replace(/[^a-z0-9 ]/g," ").replace(/\b(ltda|eireli|epp|me|s a|sa)\b/g," ").replace(/\s+/g," ").trim();
+const f1=v=>v==null?"–":v.toFixed(1).replace(".",",");
+const f2=v=>v==null?"–":v.toFixed(2).replace(".",",");
+let VIEW="pacaembu";
+try{const h=(location.hash||"").slice(1);if(["pacaembu","projetistas","todas"].includes(h))VIEW=h}catch(e){}
+/* Uma resposta por pessoa (Pacaembu) ou por empresa (projetistas): vale o envio mais recente. */
+function latestBy(list,keyFn){
+  const sorted=list.slice().sort((a,b)=>String(b.at||"").localeCompare(String(a.at||"")));
+  const kept=[];
+  sorted.forEach(it=>{const k=keyFn(it);if(!k){kept.push(it);return}
+    const dup=kept.find(o=>{const ok=keyFn(o);return ok&&(ok===k||(k.length>=4&&ok.startsWith(k))||(ok.length>=4&&k.startsWith(ok)))});
+    if(dup){dup._dups=(dup._dups||0)+1}else kept.push(it)});
+  return kept;
+}
+function split(docs){
+  const sub=fid=>docs.filter(d=>d.forms?.[fid]).map(d=>({d,at:d.atualizadoEm,r:d.forms[fid].respostas||{}}));
+  const byName=it=>norm(it.r.nome||it.d.nome);
+  const mat=latestBy(sub("maturidade"),byName), pro=latestBy(sub("processos"),byName), tec=latestBy(sub("tecnologia"),byName);
+  const prjAll=sub("projetistas");
+  const internos=prjAll.filter(it=>/pacaembu/.test(norm(it.r.empresa||it.d.empresa)));
+  const prj=latestBy(prjAll.filter(it=>!internos.includes(it)),it=>norm(it.r.empresa||it.d.empresa)||norm(it.r.nome));
+  const pessoas=latestBy([...mat,...pro,...tec].map(it=>({...it,_dups:0})),byName);
+  const envios={mat:sub("maturidade").length,pro:sub("processos").length,tec:sub("tecnologia").length,prj:prjAll.length};
+  return {mat,pro,tec,prj,internos,pessoas,envios};
+}
+
+const PAL=["#003D4C","#5E8C99","#FFB81C","#B9CBD1","#14262B","#0F7083","#D9A21B"];
+function donutChart(entries,total,unit,order){
+  if(!entries.length) return `<div class="empty">Sem respostas ainda.</div>`;
+  let cols;
+  if(order){entries=entries.slice().sort((a,b)=>{const ia=order.indexOf(a[0]),ib=order.indexOf(b[0]);return (ia<0?99:ia)-(ib<0?99:ib)});
+    const sc=order.length<=3?["#003D4C","#5E8C99","#E4002B"]:["#003D4C","#5E8C99","#FFB81C","#E4002B"];
+    cols=entries.map(e=>{const i=order.indexOf(e[0]);return i<0?"#B9CBD1":sc[Math.min(i,sc.length-1)]});}
+  else cols=entries.map((e,i)=>PAL[i%PAL.length]);
+  const sum=entries.reduce((s,e)=>s+e[1],0);
+  if(total>sum){entries=[...entries,["Sem resposta",total-sum]];cols=[...cols,"#DDE6E9"]}
+  const all=Math.max(total,sum)||1, R=60, C=2*Math.PI*R; let off=0;
+  const arcs=entries.map(([k,v],i)=>{const len=v/all*C;const a=`<circle r="${R}" cx="80" cy="80" fill="none" stroke="${cols[i]}" stroke-width="30" stroke-dasharray="${Math.max(0,len-1.5).toFixed(2)} ${(C-len+1.5).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 80 80)"><title>${esc(k)}: ${v} (${Math.round(v/all*100)}%)</title></circle>`;off+=len;return a}).join("");
+  return `<div class="donut"><svg viewBox="0 0 160 160" role="img" aria-label="Gráfico de rosca">${arcs}<text x="80" y="80" text-anchor="middle" class="dn">${total}</text><text x="80" y="99" text-anchor="middle" class="du">${esc(unit)}</text></svg>
+  <ul class="legend">${entries.map(([k,v],i)=>`<li><i style="background:${cols[i]}"></i><span>${esc(k)}</span><b>${v} <small>· ${Math.round(v/all*100)}%</small></b></li>`).join("")}</ul></div>`;
+}
+function vbars(items){ // colunas verticais para médias 1–5
+  return `<div class="vbars">${items.map(it=>`<div class="vb" title="${esc(it.label)}: ${f2(it.v)}"><b>${f1(it.v)}</b><div class="vt"><div class="vf ${it.v<3?'low':''}" style="height:${Math.max(3,(it.v-1)/4*100).toFixed(1)}%"></div><i class="vref"></i></div><span>${esc(it.label)}</span></div>`).join("")}</div>`;
+}
+function kpi(n,label,tone){return `<div class="card ${tone||''}"><b>${n}</b><small>${label}</small></div>`}
+function lead(html){return `<p class="lead">${html}</p>`}
+addEventListener("hashchange",()=>{const h=(location.hash||"").slice(1);if(["pacaembu","projetistas","todas"].includes(h)&&h!==VIEW){VIEW=h;if(allDocs.length||showSample){renderTabs();renderResults()}}});
+function viewSwitch(){
+  const b=(id,t)=>`<button type="button" class="seg ${VIEW===id?'on':''}" data-v="${id}" aria-pressed="${VIEW===id}">${t}</button>`;
+  return `<div class="segs" role="group" aria-label="Escolha os dados">${b("pacaembu","Equipe Pacaembu")}${b("projetistas","Projetistas")}${b("todas","Todas as respostas")}</div>`;
+}
 function renderResults(){
   const docs=showSample?sampleDocs():allDocs;
-  const scaleQs=FORMS[0].sections.flatMap(s=>s.qs).filter(q=>q.type==="scale");
-  const mat=docs.map(d=>d.forms?.maturidade?.respostas).filter(Boolean);
-  const tec=docs.map(d=>d.forms?.tecnologia?.respostas).filter(Boolean);
-  const pro=docs.map(d=>d.forms?.processos?.respostas).filter(Boolean);
-  const prj=docs.map(d=>d.forms?.projetistas?.respostas).filter(Boolean);
-  const counts=FORMS.map(f=>({f,n:docs.filter(d=>d.forms?.[f.id]).length}));
-  const dimAvg=DIMS.map(dm=>({label:dm,v:avg(mat.flatMap(r=>scaleQs.filter(q=>q.dim===dm).map(q=>r[q.id]))),n:mat.length})).filter(x=>x.v!=null);
-  const areas=[...new Set(mat.map(r=>r.area).filter(Boolean))];
-  const heat=areas.map(a=>({a,n:mat.filter(r=>r.area===a).length,vals:DIMS.map(dm=>avg(mat.filter(r=>r.area===a).flatMap(r=>scaleQs.filter(q=>q.dim===dm).map(q=>r[q.id]))))}));
-  const perQ=scaleQs.map(q=>({id:q.id,label:ACOES[q.id]?.[0]||q.l,full:q.l,v:avg(mat.map(r=>r[q.id])),n:mat.filter(r=>typeof r[q.id]==="number").length})).filter(x=>x.v!=null).sort((a,b)=>a.v-b.v);
-  // pré-plano
-  const plan=perQ.filter(x=>x.v<3.5).map(x=>({lac:ACOES[x.id][0],acao:ACOES[x.id][1],etapa:ACOES[x.id][2],v:x.v,pri:x.v<2.5?"Alta":x.v<3?"Média":"Baixa",src:"Maturidade"}));
-  const retr=avg(pro.map(r=>r.retrabalho));
-  if(retr!=null&&retr>=3) plan.push({lac:"Retrabalho frequente por erro ou interferência",acao:"Compatibilização antes da liberação para obra",etapa:4,v:retr,pri:retr>=4?"Alta":"Média",src:"Processos",inv:1});
-  const estab=avg(tec.map(r=>r.estab));
-  if(estab!=null&&estab<3) plan.push({lac:"Internet instável para arquivos na nuvem",acao:"Avaliar link de internet antes da aquisição do CDE",etapa:2,v:estab,pri:"Alta",src:"Tecnologia"});
-  const prjOld=prj.filter(r=>r.versao&&r.versao!=="2026").length;
-  if(prjOld) plan.push({lac:`${prjOld} projetista${prjOld>1?'s':''} fora da versão 2026 do Civil 3D`,acao:"Alinhar versão 2026.2 e requisitos no Caderno BIM",etapa:3,v:null,pri:"Média",src:"Projetistas"});
-  const prio={Alta:0,Média:1,Baixa:2}; plan.sort((a,b)=>prio[a.pri]-prio[b.pri]||a.etapa-b.etapa);
-  const rows=docs.slice().sort((a,b)=>String(b.atualizadoEm||"").localeCompare(String(a.atualizadoEm||"")));
-  const usos=tally(pro,"usos"), softs=tally(mat,"softs"), armaz=tally(tec,"armazen"), psoft=tally(prj,"softs"), pver=tally(prj,"versao");
+  const S=split(docs);
+  const totalEnv=S.envios.mat+S.envios.pro+S.envios.tec+S.envios.prj;
+  const unicos=S.mat.length+S.pro.length+S.tec.length+S.prj.length+S.internos.length;
   $("#view").innerHTML=`
-   <div class="intro"><div class="eyebrow">Somente equipe CSBIM</div><h2>Respostas e pré-plano de ação</h2>
-   <p style="margin:4px 0 0;max-width:65ch">Resultados consolidados dos questionários da Fase 01. Escala de 1 a 5; a meta mínima é 3.</p></div>
+   <div class="intro"><div class="eyebrow">Somente equipe CSBIM · Diagnóstico Fase 01</div><h2>${VIEW==="pacaembu"?"Equipe Pacaembu":VIEW==="projetistas"?"Projetistas":"Todas as respostas"}</h2>
+   <p style="margin:4px 0 0;max-width:68ch">${VIEW==="pacaembu"?`Resultados de <b>${S.pessoas.length} pessoas</b> da Pacaembu nos questionários de maturidade, processos e tecnologia.`:VIEW==="projetistas"?`Resultados de <b>${S.prj.length} empresas projetistas</b> contratadas. Respostas internas da Pacaembu ficam de fora.`:`Todos os envios da planilha, sem alteração, com a indicação do que entra na análise.`}</p></div>
    <div class="actions"><button class="ghost" type="button" id="toggleSample" aria-pressed="${showSample}">${showSample?"Voltar às respostas reais":"Mostrar com dados de exemplo"}</button></div>
-   ${showSample?`<div class="notice"><b>Dados de exemplo.</b> Os números abaixo são fictícios, só para visualizar os gráficos. Eles não estão salvos.</div>`:''}
-   <div class="cards">${counts.map(c=>`<div class="card"><b>${c.n}</b><small>${esc(c.f.nav)}</small></div>`).join("")}</div>
-
-   <h2 class="block">Diagnóstico</h2>
-   ${chartCard("Maturidade por dimensão",`${mat.length} resposta${mat.length===1?'':'s'}`, dimAvg.length?scoreBars(dimAvg):`<div class="empty">Aparece quando chegar a primeira resposta do questionário de maturidade.</div>`)}
-   ${chartCard("Maturidade por área","média de 1 a 5", heat.length?`<div class="tbl"><table class="heat"><thead><tr><th>Área</th>${DIMS.map(d=>`<th>${d}</th>`).join("")}</tr></thead><tbody>${heat.map(h=>`<tr><td><b>${esc(h.a)}</b> <small class="muted">(${h.n})</small></td>${h.vals.map((v,i)=>v==null?'<td>–</td>':`<td class="hc" style="--p:${Math.round((v-1)/4*85+8)}%" title="${esc(h.a)} · ${DIMS[i]}: ${v.toFixed(1)}"><span class="${(v-1)/4*85+8>50?'inv':''}">${v.toFixed(2).replace(".",",")}</span></td>`).join("")}</tr>`).join("")}</tbody></table></div>`:`<div class="empty">Aparece quando houver respostas com a área preenchida.</div>`, "Quanto mais escura a célula, maior a maturidade. As áreas mais claras são as primeiras a capacitar.")}
-   ${chartCard("Todas as afirmações","da menor para a maior média", perQ.length?scoreBars(perQ):`<div class="empty">Aparece com as respostas de maturidade.</div>`, "Média de 1 a 5 com duas casas decimais e número de respostas (n). Barras em vermelho estão abaixo da meta 3; as primeiras da lista são as maiores lacunas.")}
-
-   <h2 class="block">Prioridades e recursos</h2>
-   <div class="grid2">
-   ${chartCard("Usos BIM mais pedidos",`${pro.length} resposta${pro.length===1?'':'s'} de Processos`,countBars(usos,pro.length,"respostas"))}
-   ${chartCard("Softwares usados pela equipe",`${mat.length} resposta${mat.length===1?'':'s'}`,countBars(softs,mat.length,"pessoas"))}
-   ${chartCard("Onde ficam os arquivos","Inventário de tecnologia",countBars(armaz,tec.length,"respostas"))}
-   ${chartCard("Projetistas: versão do Civil 3D",`${prj.length} escritório${prj.length===1?'':'s'}`,countBars(pver,prj.length,"escritórios"))}
-   </div>
-   ${prj.length?chartCard("Projetistas: softwares usados","",countBars(psoft,prj.length,"escritórios")):''}
-
-   <h2 class="block">Pré-plano de ação</h2>
-   <p style="margin:-8px 0 0;max-width:65ch;color:var(--muted)">Gerado das respostas: cada afirmação com média abaixo de 3,5 vira uma linha. Prioridade alta abaixo de 2,5; média entre 2,5 e 3; baixa entre 3 e 3,5. Use como rascunho para o PIB (atividade 1.7).</p>
-   ${plan.length?`<div class="tbl"><table class="plan"><thead><tr><th>Prioridade</th><th>Lacuna</th><th>Ação sugerida</th><th>Etapa</th><th>Média</th></tr></thead><tbody>${plan.map(p=>`<tr><td><span class="pri p-${p.pri==="Alta"?"a":p.pri==="Média"?"m":"b"}">${p.pri==="Alta"?"▲":p.pri==="Média"?"■":"▼"} ${p.pri}</span></td><td>${esc(p.lac)}<br><small class="muted">${esc(p.src)}</small></td><td>${esc(p.acao)}</td><td>${esc(ETAPAS[p.etapa])}</td><td class="num">${p.v==null?"–":p.v.toFixed(2).replace(".",",")}</td></tr>`).join("")}</tbody></table></div>`:`<div class="empty">O pré-plano aparece quando as respostas indicarem lacunas (médias abaixo de 3,5).</div>`}
-
-   <h2 class="block">Quem respondeu</h2>
-   ${rows.length?`<div class="tbl"><table><thead><tr><th>Nome</th><th>Área / empresa</th><th>Questionários</th><th>Atualizado</th></tr></thead><tbody>
-    ${rows.map(d=>`<tr data-id="${esc(d._id||"")}"><td>${esc(d.nome||"—")}</td><td>${esc(d.empresa||d.area||"—")}</td><td>${FORMS.map(f=>`<span class="pill ${d.forms?.[f.id]?'on':''}">${esc(f.nav)}</span>`).join("")}</td><td>${d.atualizadoEm?new Date(d.atualizadoEm).toLocaleDateString("pt-BR"):"—"}</td></tr>`).join("")}
-   </tbody></table></div>
-   ${showSample?'':`<div style="display:flex;flex-direction:column;gap:10px">${rows.map(d=>`<details data-id="${esc(d._id||"")}"><summary>${esc(d.nome||"Sem nome")} ${d.empresa?'· '+esc(d.empresa):''}</summary><dl>${FORMS.filter(f=>d.forms?.[f.id]).map(f=>{const r=d.forms[f.id].respostas||{};return `<dt style="color:var(--red);font-weight:700;font-family:var(--display)">${esc(f.title)}</dt>`+f.sections.flatMap(s=>s.qs).map(q=>{const v=r[q.id];const t=Array.isArray(v)?v.join(", "):(v??"");return t===""||t===null?"":`<dt>${esc(q.l)}</dt><dd>${esc(t)}</dd>`}).join("")}).join("")}</dl></details>`).join("")}</div>`}`
-   :`<div class="empty">Nenhuma resposta ainda. Compartilhe o link desta página com a equipe e os projetistas.</div>`}`;
+   ${showSample?`<div class="notice"><b>Dados de exemplo.</b> Os números abaixo são fictícios, só para visualizar os gráficos.</div>`:''}
+   <div id="sub"></div>
+   <p class="cnote">${totalEnv} envios recebidos na planilha · ${totalEnv-unicos} repetido${totalEnv-unicos===1?'':'s'} desconsiderado${totalEnv-unicos===1?'':'s'} (vale o mais recente). Detalhes na aba Todas as respostas.</p>`;
+  $("#sub").innerHTML=VIEW==="pacaembu"?viewPacaembu(S):VIEW==="projetistas"?viewProjetistas(S):viewTodas(docs,S);
+  renderTabs();
   $("#toggleSample").addEventListener("click",()=>{showSample=!showSample;renderResults()});
+}
+function viewPacaembu(S){
+  const mat=S.mat.map(x=>x.r), pro=S.pro.map(x=>x.r), tec=S.tec.map(x=>x.r);
+  const scaleQs=FORMS[0].sections.flatMap(s=>s.qs).filter(q=>q.type==="scale");
+  const dimAvg=DIMS.map(dm=>({label:dm,v:avg(mat.flatMap(r=>scaleQs.filter(q=>q.dim===dm).map(q=>r[q.id]))),n:mat.length})).filter(x=>x.v!=null);
+  const perQ=scaleQs.map(q=>({id:q.id,label:q.l.replace(/\.$/,""),full:q.l,v:avg(mat.map(r=>r[q.id])),n:mat.filter(r=>typeof r[q.id]==="number").length})).filter(x=>x.v!=null).sort((a,b)=>a.v-b.v);
+  const areas=[...new Set(mat.map(r=>r.area).filter(Boolean))];
+  const heat=areas.map(a=>({a,n:mat.filter(r=>r.area===a).length,vals:DIMS.map(dm=>avg(mat.filter(r=>r.area===a).flatMap(r=>scaleQs.filter(q=>q.dim===dm).map(q=>r[q.id]))))})).sort((x,y)=>y.n-x.n);
+  const lows=perQ.filter(x=>x.v<3).slice(0,3), top=perQ[perQ.length-1];
+  const usos=tally(pro,"usos"), softs=tally(mat,"softs"), formatos=tally(pro,"formatos"), quant=tally(pro,"quant"), plan=tally(pro,"plan_tool"), padrao=tally(pro,"padrao");
+  const retr=avg(pro.map(r=>r.retrabalho));
+  const pc12=mat.filter(r=>r.t2===1||r.t2===2).length;
+  const tecTxt=tec.length?tec.map(r=>`<li><b>${esc(r.nome||"—")}</b>: ${[r.autodesk&&`Autodesk ${r.autodesk==="Sim"&&r.autodesk_tipo?"("+r.autodesk_tipo+")":r.autodesk}`,r.so,r.renovacao&&`renovação: ${r.renovacao.toLowerCase()}`,r.internet&&`internet ${r.internet}`,(r.armazen||[]).length&&`arquivos em ${r.armazen.join(", ")}`,r.backup&&`backup ${r.backup.toLowerCase()}`,r.vpn&&`VPN: ${r.vpn}`].filter(Boolean).map(esc).join(" · ")||"sem detalhes"}</li>`).join(""):"";
+  const tecCompletos=tec.filter(r=>Object.values(r).filter(v=>v!==null&&v!==""&&!(Array.isArray(v)&&!v.length)).length>=6).length;
+  // pré-plano Pacaembu
+  const rows=perQ.filter(x=>x.v<3.5&&ACOES[x.id]).map(x=>({lac:ACOES[x.id][0],acao:ACOES[x.id][1],etapa:ACOES[x.id][2],v:x.v,pri:x.v<2.5?"Alta":x.v<3?"Média":"Baixa",src:"Maturidade"}));
+  if(retr!=null&&retr>=3) rows.push({lac:"Retrabalho frequente por erro ou interferência",acao:"Compatibilização antes da liberação para obra",etapa:4,v:retr,pri:retr>=4?"Alta":"Média",src:"Processos"});
+  const prio={Alta:0,Média:1,Baixa:2};rows.sort((a,b)=>prio[a.pri]-prio[b.pri]||a.v-b.v);
+  return `
+   <div class="cards">
+    ${kpi(S.mat.length,"responderam Maturidade")}
+    ${kpi(S.pro.length,"responderam Processos")}
+    ${kpi(`${S.tec.length}`,`responderam Tecnologia${S.tec.length?` · ${tecCompletos} completa${tecCompletos===1?'':'s'}`:''}`)}
+   </div>
+   ${mat.length?lead(`<b>Leitura rápida:</b> ${lows.length?`as maiores lacunas são: ${lows.map(x=>`<b>${esc(ACOES[x.id]?.[0]||x.label)}</b> (${f1(x.v)})`).join("; ")}.`:'nenhuma afirmação ficou abaixo da meta 3.'} ${top?`Ponto mais forte: <b>${esc(top.label)}</b> (${f1(top.v)}).`:''}`):''}
+
+   <div class="grid2">${chartCard("1. Maturidade por dimensão",`${mat.length} pessoa${mat.length===1?'':'s'} · média de 1 a 5`, dimAvg.length?vbars(dimAvg):`<div class="empty">Sem respostas de maturidade.</div>`,"A linha tracejada é a meta mínima (3). Abaixo dela, a coluna fica vermelha.")}${chartCard("Quem respondeu, por área",`${mat.length} pessoas`,donutChart(tally(mat,"area"),mat.length,"pessoas"))}</div>
+   ${chartCard("2. Cada afirmação, da mais fraca para a mais forte","média de 1 a 5", perQ.length?scoreBars(perQ):`<div class="empty">Sem respostas.</div>`,"1 = discordo totalmente · 5 = concordo totalmente. As primeiras da lista são onde a equipe mais precisa de apoio.")}
+   ${chartCard("3. Maturidade por área","média de 1 a 5 · entre parênteses, quantas pessoas", heat.length?`<div class="tbl"><table class="heat"><thead><tr><th>Área</th>${DIMS.map(d=>`<th>${d}</th>`).join("")}</tr></thead><tbody>${heat.map(h=>`<tr><td><b>${esc(h.a)}</b> <small class="muted">(${h.n})</small></td>${h.vals.map((v,i)=>v==null?'<td>–</td>':`<td class="hc" style="--p:${Math.round((v-1)/4*85+8)}%" title="${esc(h.a)} · ${DIMS[i]}: ${f2(v)}"><span class="${(v-1)/4*85+8>50?'inv':''}">${f1(v)}</span></td>`).join("")}</tr>`).join("")}</tbody></table></div>`:`<div class="empty">Sem áreas preenchidas.</div>`,"Quanto mais escura a célula, maior a maturidade. Áreas com 1 ou 2 pessoas pesam pouco: leia com cuidado.")}
+
+   <div class="grid2">
+   ${chartCard("4. Usos BIM que mais ajudariam",`${pro.length} pessoa${pro.length===1?'':'s'} · Processos`,countBars(usos,pro.length,"pessoas"),"Cada pessoa podia marcar vários usos.")}
+   ${chartCard("5. Softwares que a equipe usa",`${mat.length} pessoa${mat.length===1?'':'s'}`,countBars(softs,mat.length,"pessoas"))}
+   ${chartCard("6. Como os projetos chegam",`${pro.length} pessoa${pro.length===1?'':'s'}`,countBars(formatos,pro.length,"pessoas"))}
+   ${chartCard("7. Como os quantitativos são levantados",`${pro.length} pessoa${pro.length===1?'':'s'}`,donutChart(quant,pro.length,"pessoas"))}
+   ${chartCard("8. Ferramenta de planejamento",`${pro.length} pessoa${pro.length===1?'':'s'}`,donutChart(plan,pro.length,"pessoas"))}
+   ${chartCard("9. Caderno de diretrizes para projetistas",`${pro.length} pessoa${pro.length===1?'':'s'}`,donutChart(padrao,pro.length,"pessoas",["Sim, atualizado","Sim, desatualizado","Não"]))}
+   </div>
+   <div class="cards">
+    ${kpi(f1(retr),"retrabalho por erro ou interferência (1 a 5; quanto maior, mais frequente)")}
+    ${kpi(`${pc12} de ${mat.length}`,"dizem que o computador não atende (nota 1 ou 2)")}
+   </div>
+   ${chartCard("10. Tecnologia (informado pela TI)",`${tec.length} resposta${tec.length===1?'':'s'}`,tec.length?`<ul class="facts">${tecTxt}</ul>`:`<div class="empty">Sem respostas de tecnologia.</div>`,tec.length<2?"Poucas respostas: confirmar licenças, VPN e políticas de segurança com a TI.":"")}
+
+   <h2 class="block">Pré-plano de ação · Equipe Pacaembu</h2>
+   <p class="cnote" style="font-size:14px">Cada afirmação com média abaixo de 3,5 vira uma linha. Prioridade <b>alta</b> abaixo de 2,5; <b>média</b> de 2,5 a 3; <b>baixa</b> de 3 a 3,5.</p>
+   ${rows.length?planTable(rows):`<div class="empty">Nenhuma lacuna abaixo de 3,5.</div>`}`;
+}
+function viewProjetistas(S){
+  const prj=S.prj.map(x=>x.r);const N=prj.length;
+  const cnt=(k,v)=>prj.filter(r=>(Array.isArray(r[k])?r[k].includes(v):r[k]===v)).length;
+  const usaBim=cnt("bim","Sim, em todos os projetos")+cnt("bim","Em alguns projetos");
+  const c3d=prj.filter(r=>(r.softs||[]).includes("Civil 3D")).length;
+  const v26=cnt("versao","2026"), ifc=cnt("ifc","Sim"), cad=cnt("caderno","Sim")+cnt("caderno","Sim, com adaptação"), semCde=cnt("cde","Nenhuma");
+  const mod=prj.reduce((s,r)=>s+(Number(r.equipe)||0),0);
+  const lvl={"Sim, em todos os projetos":0,"Em alguns projetos":1,"Ainda não":2};
+  const tbl=S.prj.slice().sort((a,b)=>(lvl[a.r.bim]??3)-(lvl[b.r.bim]??3)||String(a.r.empresa).localeCompare(String(b.r.empresa)));
+  const tag=(v,good,bad)=>v?`<span class="tag ${good.includes(v)?'g':bad.includes(v)?'b':''}">${esc(v)}</span>`:'<span class="muted">–</span>';
+  const obs=S.prj.filter(x=>x.r.obs&&String(x.r.obs).trim());
+  const rows=[];
+  if(N-v26) rows.push({lac:`${N-v26} de ${N} empresas fora do Civil 3D 2026 (${cnt("versao","2025")} na 2025, ${cnt("versao","2024 ou anterior")} na 2024 ou anterior, ${cnt("versao","Não usa")} não usam)`,acao:"Definir a versão 2026.2 como mínima no Caderno BIM e dar prazo de adequação",etapa:3,v:null,pri:"Média",src:"Projetistas"});
+  if(semCde) rows.push({lac:`${semCde} empresas sem experiência com CDE`,acao:"Treinamento de entrada no CDE e protocolo de envio de arquivos",etapa:2,v:null,pri:semCde>=N/2?"Alta":"Média",src:"Projetistas"});
+  const nao=cnt("bim","Ainda não"); if(nao) rows.push({lac:`${nao} empresas ainda não trabalham em BIM`,acao:"Orientação e requisitos mínimos de entrega para quem está começando",etapa:3,v:null,pri:"Média",src:"Projetistas"});
+  const naoCad=S.prj.filter(x=>x.r.caderno==="Não"); if(naoCad.length) rows.push({lac:`${naoCad.length} empresa${naoCad.length>1?'s':''} não pode${naoCad.length>1?'m':''} seguir o Caderno BIM hoje (${naoCad.map(x=>esc(x.r.empresa)).join(", ")})`,acao:"Conversa individual e plano de transição",etapa:3,v:null,pri:"Alta",src:"Projetistas"});
+  const prio={Alta:0,Média:1,Baixa:2};rows.sort((a,b)=>prio[a.pri]-prio[b.pri]);
+  return `
+   ${S.internos.length?`<div class="notice">${S.internos.length} resposta${S.internos.length>1?'s':''} com empresa “Pacaembu” no questionário de projetistas ${S.internos.length>1?'foram deixadas':'foi deixada'} de fora desta análise (${S.internos.map(x=>esc(x.r.nome||x.d.nome)).join(", ")}).</div>`:''}
+   <div class="cards">
+    ${kpi(`${usaBim} de ${N}`,"já trabalham em BIM (todos ou alguns projetos)","dark")}
+    ${kpi(`${c3d} de ${N}`,`usam Civil 3D · ${v26} na versão 2026`)}
+    ${kpi(`${ifc} de ${N}`,"exportam IFC")}
+    ${kpi(`${cad} de ${N}`,"aceitam seguir o Caderno BIM")}
+    ${kpi(`${semCde} de ${N}`,"sem experiência com CDE","red")}
+    ${kpi(mod,"profissionais que modelam em 3D (soma)")}
+   </div>
+   ${N?lead(`<b>Leitura rápida:</b> ${usaBim} das ${N} empresas já usam BIM, e ${cad} aceitam seguir o Caderno BIM. O ponto mais fraco é o ambiente de troca de arquivos: <b>${semCde}</b> nunca trabalharam com CDE.`):''}
+   <div class="grid2">
+   ${chartCard("1. Nível de BIM",`${N} empresas`,donutChart(tally(prj,"bim"),N,"empresas",["Sim, em todos os projetos","Em alguns projetos","Ainda não"]))}
+   ${chartCard("2. Versão do Civil 3D",`${N} empresas`,donutChart(tally(prj,"versao"),N,"empresas",["2026","2025","2024 ou anterior","Não usa"]))}
+   ${chartCard("3. Experiência com CDE",`${N} empresas`,donutChart(tally(prj,"cde"),N,"empresas",["Autodesk Docs / Forma","BIM 360","Outro CDE","Nenhuma"]))}
+   ${chartCard("4. Seguir o Caderno BIM da Pacaembu",`${N} empresas`,donutChart(tally(prj,"caderno"),N,"empresas",["Sim","Sim, com adaptação","Não"]))}
+   ${chartCard("5. Softwares usados",`${N} empresas`,countBars(tally(prj,"softs"),N,"empresas"),"Cada empresa podia marcar vários.")}
+   ${chartCard("6. Disciplinas atendidas",`${N} empresas`,countBars(tally(prj,"disc"),N,"empresas"),"Cada empresa podia marcar várias.")}
+   </div>
+   ${chartCard("7. Empresa por empresa","ordenadas pelo nível de BIM",N?`<div class="tbl"><table class="info"><thead><tr><th>Empresa</th><th>BIM</th><th>Civil 3D</th><th>IFC</th><th>CDE</th><th>Caderno BIM</th><th class="num">Modelam 3D</th></tr></thead><tbody>${tbl.map(x=>{const r=x.r;return `<tr><td><b>${esc(r.empresa||"—")}</b><br><small class="muted">${esc(r.nome||"")}${x._dups?` · ${x._dups} envio${x._dups>1?'s':''} repetido${x._dups>1?'s':''} ignorado${x._dups>1?'s':''}`:''}</small></td><td>${tag(r.bim,["Sim, em todos os projetos"],["Ainda não"])}</td><td>${tag(r.versao,["2026"],["Não usa","2024 ou anterior"])}</td><td>${tag(r.ifc,["Sim"],["Não"])}</td><td>${tag(r.cde,["Autodesk Docs / Forma","BIM 360","Outro CDE"],["Nenhuma"])}</td><td>${tag(r.caderno,["Sim"],["Não"])}</td><td class="num">${esc(r.equipe??"–")}</td></tr>`}).join("")}</tbody></table></div>`:`<div class="empty">Sem respostas de projetistas.</div>`,"Verde = pronto · vermelho = precisa de atenção.")}
+   ${obs.length?chartCard("8. O que os projetistas comentaram",`${obs.length} comentário${obs.length>1?'s':''}`,`<ul class="facts">${obs.map(x=>`<li><b>${esc(x.r.empresa)}</b>: ${esc(x.r.obs)}</li>`).join("")}</ul>`):''}
+
+   <h2 class="block">Pré-plano de ação · Projetistas</h2>
+   ${rows.length?planTable(rows):`<div class="empty">Nenhuma lacuna identificada.</div>`}`;
+}
+function planTable(rows){return `<div class="tbl"><table class="plan"><thead><tr><th>Prioridade</th><th>Lacuna</th><th>Ação sugerida</th><th>Etapa</th><th class="num">Média</th></tr></thead><tbody>${rows.map(p=>`<tr><td><span class="pri p-${p.pri==="Alta"?"a":p.pri==="Média"?"m":"b"}">${p.pri==="Alta"?"▲":p.pri==="Média"?"■":"▼"} ${p.pri}</span></td><td>${p.lac}<br><small class="muted">${esc(p.src)}</small></td><td>${esc(p.acao)}</td><td>${esc(ETAPAS[p.etapa])}</td><td class="num">${p.v==null?"–":f2(p.v)}</td></tr>`).join("")}</tbody></table></div>`}
+function viewTodas(docs,S){
+  const keep=new Set([...S.mat,...S.pro,...S.tec,...S.prj].map(x=>x.d));
+  const intern=new Set(S.internos.map(x=>x.d));
+  const rows=docs.slice().sort((a,b)=>String(b.atualizadoEm||"").localeCompare(String(a.atualizadoEm||"")));
+  const grupo=d=>d.forms?.projetistas?"Projetista":"Pacaembu";
+  const st=d=>intern.has(d)?'<span class="tag b">Fora da análise (empresa Pacaembu)</span>':keep.has(d)?'<span class="tag g">Considerada</span>':'<span class="tag">Repetida · vale a mais recente</span>';
+  return `
+   <p class="cnote" style="font-size:14px">Lista completa da planilha, sem nenhuma alteração. A coluna <b>Situação</b> mostra se o envio entra na análise. Use a lixeira só se quiser apagar o envio de vez da planilha.</p>
+   ${rows.length?`<div class="tbl"><table class="list"><thead><tr><th>Nome</th><th>Grupo</th><th>Área / empresa</th><th>Questionário</th><th>Enviado em</th><th>Situação</th></tr></thead><tbody>
+    ${rows.map(d=>`<tr data-id="${esc(d._id||"")}"><td>${esc(d.nome||"—")}</td><td>${grupo(d)}</td><td>${esc(d.empresa||d.area||"—")}</td><td>${FORMS.filter(f=>d.forms?.[f.id]).map(f=>esc(f.nav)).join(", ")}</td><td>${d.atualizadoEm?new Date(d.atualizadoEm).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}):"—"}</td><td>${st(d)}</td></tr>`).join("")}
+   </tbody></table></div>
+   ${showSample?'':`<h2 class="block">Respostas completas</h2><div style="display:flex;flex-direction:column;gap:10px">${rows.map(d=>`<details data-id="${esc(d._id||"")}"><summary>${esc(d.nome||"Sem nome")} ${d.empresa?'· '+esc(d.empresa):''} <small class="muted">· ${FORMS.filter(f=>d.forms?.[f.id]).map(f=>esc(f.nav)).join(", ")}</small></summary><dl>${FORMS.filter(f=>d.forms?.[f.id]).map(f=>{const r=d.forms[f.id].respostas||{};return `<dt style="color:var(--red);font-weight:700;font-family:var(--display)">${esc(f.title)}</dt>`+f.sections.flatMap(s=>s.qs).map(q=>{const v=r[q.id];const t=Array.isArray(v)?v.join(", "):(v??"");return t===""||t===null?"":`<dt>${esc(q.l)}</dt><dd>${esc(t)}</dd>`}).join("")}).join("")}</dl></details>`).join("")}</div>`}`
+   :`<div class="empty">Nenhuma resposta ainda.</div>`}`;
 }
 
 function render(){renderTabs();const c=current();if(c==="respostas")renderResults();else renderForm(FORMS.find(f=>f.id===c))}
 
 isAdmin=true;
 function current(){return "respostas"}
-function renderTabs(){$("#tabs").innerHTML=`<a href="#respostas" aria-current="page">Área de admin · Respostas <span class="n">${allDocs.length}</span></a>`}
+function renderTabs(){
+  if(!AUTH&&!showSample){$("#tabs").innerHTML=`<a href="#" aria-current="page">Área de admin</a>`;return}
+  let S=null;try{S=split(showSample?sampleDocs():allDocs)}catch(e){}
+  const t=(id,label,n)=>`<a href="#${id}" data-v="${id}" ${VIEW===id?'aria-current="page"':''}>${label}${n!=null?` <span class="n">${n}</span>`:''}</a>`;
+  $("#tabs").innerHTML=t("pacaembu","Equipe Pacaembu",S?S.pessoas.length:null)+t("projetistas","Projetistas",S?S.prj.length:null)+t("todas","Todas as respostas",S?(showSample?sampleDocs():allDocs).length:null);
+  $("#tabs").querySelectorAll("a[data-v]").forEach(a=>a.onclick=e=>{e.preventDefault();VIEW=a.dataset.v;try{history.replaceState(null,"","#"+VIEW)}catch(_){};renderTabs();renderResults();window.scrollTo({top:0,behavior:"smooth"})});
+}
 function toDocs(rows){return rows.map(r=>({_id:r.enviadoEm,nome:r.nome,area:r.area,empresa:r.empresa,atualizadoEm:r.enviadoEm,forms:{[r.form]:{respostas:r.respostas||{},enviadoEm:r.enviadoEm}}}))}
 let RAW=[],AUTH=null;
 const _rr=renderResults;
@@ -447,7 +604,7 @@ function trashCtl(id,box){
 }
 function decorate(){
   if(showSample||!AUTH)return;
-  const tb=document.querySelector("#view table:not(.heat):not(.plan)");
+  const tb=document.querySelector("#view table.list");
   if(tb){const hr=tb.querySelector("thead tr");if(hr&&!hr.querySelector(".act"))hr.insertAdjacentHTML("beforeend",'<th class="act" style="width:1%;white-space:nowrap">Excluir</th>');
     tb.querySelectorAll("tbody tr[data-id]").forEach(tr=>{const id=tr.getAttribute("data-id");if(!id||tr.querySelector(".act"))return;const td=document.createElement("td");td.className="act";tr.appendChild(td);trashCtl(id,td)});}
   document.querySelectorAll("#view details[data-id]").forEach(d=>{const id=d.getAttribute("data-id"),sm=d.querySelector("summary");if(!id||!sm||sm.querySelector(".act"))return;const sp=document.createElement("span");sp.className="act";sp.style.float="right";sm.appendChild(sp);trashCtl(id,sp)});
@@ -479,7 +636,7 @@ async function load(email,key){
     const bar=document.createElement("div");bar.className="actions";
     bar.innerHTML=`<button class="primary" type="button" id="dl">Baixar respostas (Excel/CSV)</button><button class="ghost" type="button" id="rf">Atualizar</button><button class="ghost" type="button" id="out">Sair</button>`;
     let ab=document.getElementById("adminbar");if(!ab){ab=document.createElement("div");ab.id="adminbar";ab.className="wrap";ab.style.paddingTop="20px";$("main").prepend(ab)}ab.innerHTML="";ab.appendChild(bar);
-    $("#dl").onclick=csv;$("#rf").onclick=()=>load(email,key);$("#out").onclick=()=>{try{sessionStorage.removeItem("adminAuth")}catch(e){};login()};
+    $("#dl").onclick=csv;$("#rf").onclick=()=>load(email,key);$("#out").onclick=()=>{try{sessionStorage.removeItem("adminAuth")}catch(e){};AUTH=null;login()};
   }catch(e){const u=window.APPS_SCRIPT_URL||"(vazio)";const ok=/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(u);
     $("#view").innerHTML=`<div class="notice"><b>Não foi possível carregar as respostas.</b><br>Endereço configurado em config.js: <code style="word-break:break-all">${esc(u)}</code><br>${ok?'O formato do endereço está certo. Clique em <b>Testar conexão</b>: deve abrir uma página com {"ok":false}. Se abrir login do Google ou erro, ajuste a implantação (Quem pode acessar: Qualquer pessoa) e crie uma Nova versão.':'<b>O endereço não está no formato certo.</b> Ele precisa começar com https://script.google.com/macros/s/ e terminar em /exec.'}</div>
     <div class="actions">${ok?`<a class="ghost" style="text-decoration:none;font-family:var(--display);font-weight:700;font-size:14px;border:1px solid var(--line);border-radius:6px;padding:12px 20px;color:var(--fg)" href="${esc(u)}?email=teste&key=teste" target="_blank" rel="noopener">Testar conexão</a>`:''}<button class="primary" type="button" id="relog">Entrar novamente</button></div>`;
