@@ -250,7 +250,8 @@ const FORMS=[
     {id:"disc_interna",l:"Quais delas são feitas pela própria equipe da Pacaembu?",type:"check",o:["Arquitetura","Estrutural","Fundações","Esgotamento sanitário","Abastecimento de água","Águas pluviais","Elétrica","Gás","SPDA","Telefonia / dados","Incêndio (PPCI)","Climatização / exaustão","Impermeabilização","Paisagismo","Nenhuma, todas são terceirizadas"]},
     {id:"tipologia",l:"Tipologias de edificação que a Pacaembu desenvolve",type:"check",o:["Casas térreas","Sobrados","Edifícios residenciais","Condomínios horizontais","Comercial / institucional"]},
     {id:"padrao",l:"Existem projetos-padrão (plantas repetidas entre empreendimentos)?",type:"radio",o:["Sim, e são atualizados","Sim, mas estão desatualizados","Não"]},
-    {id:"softs",l:"Quais softwares você usa nos projetos de edificações?",type:"check",o:["AutoCAD","Revit","Navisworks","TQS","Eberick","QiBuilder / AltoQi","SketchUp","Excel","MS Project","Visualizador IFC"]}]},
+    {id:"softs",l:"Quais softwares são utilizados para projetar as edificações?",type:"check",o:["AutoCAD","Revit","ArchiCAD","SketchUp","TQS","Eberick","CYPECAD","QiBuilder / AltoQi (hidráulica e elétrica)","Navisworks","Enscape / Lumion / Twinmotion (imagens)","Excel","MS Project","Visualizador IFC"]},
+    {id:"softs_outros",l:"Outros softwares",type:"text"}]},
    {t:"Como funciona hoje",qs:[
     {id:"e1",l:"Tenho experiência prática com o Revit.",type:"scale"},
     {id:"e2",l:"Consigo abrir e consultar modelos 3D ou IFC de edificações.",type:"scale"},
@@ -292,7 +293,8 @@ const FORMS=[
     {id:"equipe",l:"Quantos profissionais da equipe modelam em 3D?",type:"number"}]},
    {t:"Ferramentas e experiência",qs:[
     {id:"bim",l:"A empresa já trabalha em BIM?",type:"radio",o:["Sim, em todos os projetos","Em alguns projetos","Ainda não"]},
-    {id:"softs",l:"Softwares usados",type:"check",o:["Revit","ArchiCAD","TQS","Eberick","QiBuilder / AltoQi","AutoCAD","Navisworks","SketchUp","Outros"]},
+    {id:"softs",l:"Quais softwares a empresa utiliza para projetar?",type:"check",o:["Revit","ArchiCAD","AutoCAD","SketchUp","TQS","Eberick","CYPECAD","QiBuilder / AltoQi (hidráulica e elétrica)","Navisworks","Enscape / Lumion / Twinmotion (imagens)","Outros"]},
+    {id:"softs_outros",l:"Quais outros?",type:"text"},
     {id:"versao",l:"Versão do Revit",type:"radio",o:["2026","2025","2024 ou anterior","Não usa"]},
     {id:"ifc",l:"Consegue exportar os modelos em IFC?",type:"radio",o:["Sim","Não","Não sei"]},
     {id:"lod",l:"Até que nível de detalhe a empresa costuma modelar?",type:"radio",o:["Estudo / anteprojeto","Projeto executivo","Detalhamento para obra"]},
