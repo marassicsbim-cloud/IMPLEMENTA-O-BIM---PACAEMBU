@@ -189,10 +189,31 @@ td.tl.crit{background:#FBE0E5;color:#9E0020}td.tl.aten{background:#FFF1CC;color:
 .ar b{font-family:var(--display);text-align:right;font-variant-numeric:tabular-nums}
 .ar .lt{height:12px}
 .area-f{margin:2px 0 0;font-size:13.5px;line-height:1.4;border-top:1px solid var(--line);padding-top:8px}
+.why{margin:12px 0 0;padding:10px 14px;background:var(--surface-2);border-left:4px solid var(--navy);border-radius:6px;font-size:14px;line-height:1.5}
+.why b:first-child{color:var(--navy)}
+#printfoot{display:none}
+@media print{
+ @page{size:A4;margin:12mm 10mm 14mm}
+ *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+ html,body{background:#fff!important}
+ #plexus,nav.tabs,#adminbar,.actions,.admbtn,#view details,.trash,#view .cnote:last-child:not(.why){display:none!important}
+ header.brand{padding:0 0 6px!important;border:0!important}
+ header.brand p{display:none!important}
+ header.brand h1{font-size:20px!important;margin:4px 0!important}
+ .logo svg.lg,.logo img{height:32px!important;width:auto!important}
+ main,.wrap{max-width:none!important;padding-left:0!important;padding-right:0!important}
+ .section,.card,.area,.lead,.howto,.why,.notice,tr,.lb,.donut{break-inside:avoid;page-break-inside:avoid}
+ h2.block{break-after:avoid;page-break-after:avoid}
+ .section{box-shadow:none!important}
+ .tbl{overflow:visible!important}
+ .grid2{grid-template-columns:1fr 1fr!important}
+ .cards{grid-template-columns:repeat(3,1fr)!important}
+ #printfoot{display:block;position:fixed;bottom:0;left:0;right:0;font-size:9pt;color:#56707A;text-align:center;border-top:1px solid #D3DEE1;padding-top:4px}
+}
 </style>
 <meta name="robots" content="noindex">
 </head>
-<body><canvas id="plexus" aria-hidden="true"></canvas>
+<body><canvas id="plexus" aria-hidden="true"></canvas><div id="printfoot" aria-hidden="true"></div>
 <script>(function(){var c=document.getElementById("plexus");if(!c||!c.getContext)return;var x=c.getContext("2d");
 var RED=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches,SPEED=RED?8:18,LINK=150,W,H,P=[],dpr=Math.min(1.5,window.devicePixelRatio||1),last=0;
 function size(){W=innerWidth;H=innerHeight;c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);c.style.width=W+"px";c.style.height=H+"px";x.setTransform(dpr,0,0,dpr,0,0);var n=Math.round(Math.max(22,Math.min(60,W*H/30000)));if(P.length===n)return;P=[];for(var i=0;i<n;i++){var a=Math.random()*6.283;P.push({x:Math.random()*W,y:Math.random()*H,vx:Math.cos(a),vy:Math.sin(a),r:Math.random()*1.4+1.3,k:i%9===0?1:(i%11===0?2:0)})}}
@@ -474,11 +495,30 @@ function tally(list,key){const m={};list.forEach(r=>{const v=r?.[key];(Array.isA
 function countBars(entries,total,unit){
   if(!entries.length) return `<div class="empty">Sem respostas ainda.</div>`;
   const pct=v=>total?Math.round(v/total*100):0;
-  return `<div class="hbars cnt">${entries.map(([k,v])=>`<div class="hb" title="${esc(k)}: ${v} de ${total} ${unit} (${pct(v)}%)"><span class="hb-l">${esc(k)}</span><div class="track grid4"><div class="fill" style="width:${pct(v)}%"></div></div><b>${v} <small>· ${pct(v)}%</small></b></div>`).join("")}</div><p class="cnote" style="margin-top:2px">% de ${total} ${unit}.</p>`;
+  return `<div class="hbars cnt">${entries.map(([k,v])=>`<div class="hb" title="${esc(k)}: ${v} de ${total} ${unit} (${pct(v)}%)"><span class="hb-l">${esc(k)}</span><div class="track grid4"><div class="fill" style="width:${pct(v)}%"></div></div><b>${v} <small>· ${pct(v)}%</small></b></div>`).join("")}</div><p class="cnote" style="margin-top:2px">Cada barra mostra quantas ${unit} marcaram a opção e o % sobre o total de ${total}.</p>${whyCount(entries,total,unit)}`;
 }
 function scoreBars(items){
   const f2=v=>v.toFixed(2).replace(".",",");
   return `<div class="hbars scored">${items.map(it=>`<div class="hb" title="${esc(it.full||it.label)}: média ${f2(it.v)} de 5 · ${it.n} resposta${it.n===1?'':'s'}"><span class="hb-l">${esc(it.label)}</span><div class="track grid4"><div class="fill ${it.v<3?'low':''}" style="width:${Math.max(1.5,(it.v-1)/4*100).toFixed(1)}%"></div><i class="ref" aria-hidden="true"></i></div><b>${f2(it.v)} <small>n=${it.n}</small></b></div>`).join("")}</div><div class="axisnote"><span></span><div class="ax"><span style="left:0">1</span><span class="t" style="left:25%">2</span><span class="m" style="left:50%">3 · meta</span><span class="t" style="left:75%">4</span><span class="e">5</span></div><span></span></div>`;
+}
+
+function why(html){return `<p class="why"><b>O que isso mostra:</b> ${html}</p>`}
+const nmr=(n,u)=>`${n} ${n===1?u.replace(/s$/,""):u}`;
+function whyCount(entries,total,unit){
+  if(!entries.length||!total) return "";
+  const [a,b,c]=entries, pc=v=>Math.round(v/total*100);
+  let t=`<b>${esc(a[0])}</b> foi a opção mais marcada: ${a[1]} de ${nmr(total,unit)} (${pc(a[1])}%).`;
+  if(b) t+=` Depois vêm <b>${esc(b[0])}</b> (${b[1]})${c?` e <b>${esc(c[0])}</b> (${c[1]})`:''}.`;
+  return why(t);
+}
+function whyDonut(entries,total,unit,order){
+  if(!entries.length||!total) return "";
+  const top=entries.slice().sort((a,b)=>b[1]-a[1])[0], pc=v=>Math.round(v/total*100);
+  let t=`A resposta mais comum foi <b>${esc(top[0])}</b>: ${top[1]} de ${nmr(total,unit)} (${pc(top[1])}%).`;
+  if(order&&order.length>1){const bad=order[order.length-1],e=entries.find(x=>x[0]===bad);
+    if(e&&e[1]&&e[0]!==top[0]) t+=` Atenção para ${nmr(e[1],unit)} que marcaram <b>${esc(bad)}</b>.`;
+    const good=order[0],g=entries.find(x=>x[0]===good); if(g&&g[0]!==top[0]) t+=` Já <b>${esc(good)}</b> foi a resposta de ${g[1]}.`;}
+  return why(t);
 }
 function chartCard(title,sub,body,note){return `<section class="section chart"><h3>${esc(title)}${sub?` <small>${esc(sub)}</small>`:''}</h3>${body}${note?`<p class="cnote">${note}</p>`:''}</section>`}
 /* ===== Interpretação dos dados (somente leitura; a planilha não é alterada) ===== */
@@ -518,12 +558,13 @@ function donutChart(entries,total,unit,order){
     const sc=order.length<=3?["#003D4C","#5E8C99","#E4002B"]:["#003D4C","#5E8C99","#FFB81C","#E4002B"];
     cols=entries.map(e=>{const i=order.indexOf(e[0]);return i<0?"#B9CBD1":sc[Math.min(i,sc.length-1)]});}
   else cols=entries.map((e,i)=>PAL[i%PAL.length]);
+  const _orig=entries.slice();
   const sum=entries.reduce((s,e)=>s+e[1],0);
   if(total>sum){entries=[...entries,["Sem resposta",total-sum]];cols=[...cols,"#DDE6E9"]}
   const all=Math.max(total,sum)||1, R=60, C=2*Math.PI*R; let off=0;
   const arcs=entries.map(([k,v],i)=>{const len=v/all*C;const a=`<circle r="${R}" cx="80" cy="80" fill="none" stroke="${cols[i]}" stroke-width="30" stroke-dasharray="${Math.max(0,len-1.5).toFixed(2)} ${(C-len+1.5).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 80 80)"><title>${esc(k)}: ${v} (${Math.round(v/all*100)}%)</title></circle>`;off+=len;return a}).join("");
   return `<div class="donut"><svg viewBox="0 0 160 160" role="img" aria-label="Gráfico de rosca">${arcs}<text x="80" y="80" text-anchor="middle" class="dn">${total}</text><text x="80" y="99" text-anchor="middle" class="du">${esc(unit)}</text></svg>
-  <ul class="legend">${entries.map(([k,v],i)=>`<li><i style="background:${cols[i]}"></i><span>${esc(k)}</span><b>${v} <small>· ${Math.round(v/all*100)}%</small></b></li>`).join("")}</ul></div>`;
+  <ul class="legend">${entries.map(([k,v],i)=>`<li><i style="background:${cols[i]}"></i><span>${esc(k)}</span><b>${v} <small>· ${Math.round(v/all*100)}%</small></b></li>`).join("")}</ul></div>${whyDonut(_orig,total,unit,order)}`;
 }
 
 /* ===== Leitura simples: nível de 0% a 100% e semáforo ===== */
@@ -537,10 +578,12 @@ const chip=p=>{const x=stat(p);return `<span class="st ${x.k}">${x.t}</span>`};
 function legendBox(){return `<div class="howto"><b>Como ler:</b> cada item vai de <b>0%</b> (precisa de tudo) a <b>100%</b> (ideal).
  <span class="st crit">Crítico</span> abaixo de 35% <span class="st aten">Atenção</span> de 35% a 59% <span class="st bom">Bom</span> 60% ou mais</div>`}
 function levelBars(items){ // items: {label,v(1-5)}
-  return `<div class="lbars">${items.map(it=>{const p=lvl(it.v),x=stat(p);return `<div class="lb" title="${esc(it.label)}: ${p}% (${x.t})"><span class="lb-l">${esc(it.label)}</span><div class="lt"><div class="lf ${x.k}" style="width:${Math.max(2,p)}%"></div></div><span class="lb-v"><b>${p}%</b> ${chip(p)}</span></div>`}).join("")}</div><div class="lax"><i></i><div><span>0%</span><span>50%</span><span>100%</span></div><i></i></div>`;
+  return `<div class="lbars">${items.map(it=>{const p=lvl(it.v),x=stat(p);return `<div class="lb" title="${esc(it.label)}: ${p}% (${x.t})"><span class="lb-l">${esc(it.label)}</span><div class="lt"><div class="lf ${x.k}" style="width:${Math.max(2,p)}%"></div></div><span class="lb-v"><b>${p}%</b> ${chip(p)}</span></div>`}).join("")}</div><div class="lax"><i></i><div><span>0%</span><span>50%</span><span>100%</span></div><i></i></div>${(()=>{const c=items.filter(i=>lvl(i.v)<35).length,a=items.filter(i=>{const p=lvl(i.v);return p>=35&&p<60}).length,g=items.length-c-a;return why(`${c} ${c===1?"item está":"itens estão"} em <b>Crítico</b>, ${a} em <b>Atenção</b> e ${g} em <b>Bom</b>. A barra cheia (100%) seria a situação ideal.`)})()}`;
 }
 function vbars(items){
-  return `<div class="vbars">${items.map(it=>{const p=lvl(it.v),x=stat(p);return `<div class="vb" title="${esc(it.label)}: ${p}%"><b>${p}%</b>${chip(p)}<div class="vt"><div class="vf ${x.k}" style="height:${Math.max(3,p)}%"></div></div><span>${esc(it.label)}</span></div>`}).join("")}</div>`;
+  const srt=items.filter(i=>i.v!=null).slice().sort((a,b)=>a.v-b.v), lo=srt[0], hi=srt[srt.length-1];
+  const ex=lo&&hi&&lo!==hi?why(`O tema mais fraco é <b>${esc(lo.label)}</b> (${lvl(lo.v)}%) e o mais forte é <b>${esc(hi.label)}</b> (${lvl(hi.v)}%). Conhecimento = o que a equipe sabe de BIM; Processos = como os projetos são organizados; Ferramentas = computadores, arquivos e programas.`):"";
+  return `<div class="vbars">${items.map(it=>{const p=lvl(it.v),x=stat(p);return `<div class="vb" title="${esc(it.label)}: ${p}%"><b>${p}%</b>${chip(p)}<div class="vt"><div class="vf ${x.k}" style="height:${Math.max(3,p)}%"></div></div><span>${esc(it.label)}</span></div>`}).join("")}</div>${ex}`;
 }
 function kpi(n,label,tone){return `<div class="card ${tone||''}"><b>${n}</b><small>${label}</small></div>`}
 function lead(html){return `<p class="lead">${html}</p>`}
@@ -557,13 +600,19 @@ function renderResults(){
   $("#view").innerHTML=`
    <div class="intro"><div class="eyebrow">Somente equipe CSBIM · Diagnóstico Fase 01</div><h2>${VIEW==="pacaembu"?"Loteamentos · Equipe Pacaembu":VIEW==="edifequipe"?"Edificações · Equipe Pacaembu":VIEW==="projetistas"?"Projetistas · Loteamentos":VIEW==="edificacoes"?"Projetistas · Edificações":"Todas as respostas"}</h2>
    <p style="margin:4px 0 0;max-width:68ch">${VIEW==="pacaembu"?`Resultados de <b>${S.pessoas.length} pessoas</b> da Pacaembu nos questionários de maturidade, processos e tecnologia (loteamentos).`:VIEW==="edifequipe"?`Resultados de <b>${S.edq.length} pessoa${S.edq.length===1?'':'s'}</b> da Pacaembu no questionário de edificações.`:VIEW==="projetistas"?`Resultados de <b>${S.prj.length} empresas projetistas de loteamentos</b>. Respostas internas da Pacaembu ficam de fora.`:VIEW==="edificacoes"?`Resultados de <b>${S.prjE.length} empresa${S.prjE.length===1?'':'s'} projetista${S.prjE.length===1?'':'s'} de edificações</b>. Respostas internas da Pacaembu ficam de fora.`:`Todos os envios da planilha, sem alteração, com a indicação do que entra na análise.`}</p></div>
-   <div class="actions"><button class="ghost" type="button" id="toggleSample" aria-pressed="${showSample}">${showSample?"Voltar às respostas reais":"Mostrar com dados de exemplo"}</button></div>
+   <div class="actions"><button class="primary" type="button" id="pdfBtn" title="Abre a janela de impressão: escolha “Salvar como PDF”">Gerar PDF desta aba</button><button class="ghost" type="button" id="toggleSample" aria-pressed="${showSample}">${showSample?"Voltar às respostas reais":"Mostrar com dados de exemplo"}</button></div>
    ${showSample?`<div class="notice"><b>Dados de exemplo.</b> Os números abaixo são fictícios, só para visualizar os gráficos.</div>`:''}
    <div id="sub"></div>
    <p class="cnote">${totalEnv} envios recebidos na planilha · ${totalEnv-unicos} repetido${totalEnv-unicos===1?'':'s'} desconsiderado${totalEnv-unicos===1?'':'s'} (vale o mais recente). Detalhes na aba Todas as respostas.</p>`;
   $("#sub").innerHTML=VIEW==="pacaembu"?viewPacaembu(S):VIEW==="edifequipe"?viewEdifEquipe(S):VIEW==="projetistas"?viewProjetistas(S,false):VIEW==="edificacoes"?viewProjetistas(S,true):viewTodas(docs,S);
   renderTabs();
   $("#toggleSample").addEventListener("click",()=>{showSample=!showSample;renderResults()});
+  $("#pdfBtn").onclick=()=>{const nm={pacaembu:"Loteamentos - Equipe",edifequipe:"Edificacoes - Equipe",projetistas:"Projetistas - Loteamentos",edificacoes:"Projetistas - Edificacoes",todas:"Todas as respostas"}[VIEW]||VIEW;
+    const d=new Date(),dd=String(d.getDate()).padStart(2,"0")+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+d.getFullYear();
+    const old=document.title;document.title=`Diagnostico BIM Pacaembu - ${nm} - ${dd}`;
+    const pf=document.getElementById("printfoot");if(pf)pf.textContent=`Diagnóstico BIM – Fase 01 · Pacaembu · ${nm.replace(" - "," · ")} · gerado em ${d.toLocaleDateString("pt-BR")} · CSBIM`;
+    document.querySelectorAll("#view details").forEach(x=>x.dataset.wasOpen=x.open);
+    setTimeout(()=>{window.print();document.title=old},50)};
 }
 function viewPacaembu(S){
   const mat=S.mat.map(x=>x.r), pro=S.pro.map(x=>x.r), tec=S.tec.map(x=>x.r);
