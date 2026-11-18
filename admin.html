@@ -803,6 +803,54 @@ async function del(id,td){
     if(j.ok){load(AUTH[0],AUTH[1])}else{td.innerHTML='<span class="cf">Não encontrada. Clique em Atualizar.</span>'}
   }catch(e){td.innerHTML='<span class="cf">Falha ao excluir. Tente de novo.</span>'}
 }
+
+/* ===== Lista de participantes (Excel) ===== */
+function loadXLSX(){return new Promise((ok,no)=>{if(window.XLSX)return ok(window.XLSX);const sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";sc.onload=()=>ok(window.XLSX);sc.onerror=no;document.head.appendChild(sc)})}
+function participantesData(){
+  const INT=["maturidade","tecnologia","processos","edif_equipe"];
+  const fnav=id=>(FORMS.find(f=>f.id===id)||{}).nav||id;
+  const dt=v=>v?new Date(v).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}):"";
+  const recs=RAW.map(r=>{const emp=r.empresa||(r.respostas||{}).empresa||"";const nome=r.nome||(r.respostas||{}).nome||"";
+    const interno=INT.includes(r.form)||/pacaembu/.test(norm(emp));
+    return {r,nome,emp,area:r.area||(r.respostas||{}).area||"",interno,grupo:interno?"Pacaembu":(r.form==="projetistas_edif"?"Projetista · Edificações":"Projetista · Loteamentos"),
+      key:interno?norm(nome):norm(emp)||norm(nome)}}).sort((a,b)=>String(b.r.enviadoEm).localeCompare(String(a.r.enviadoEm)));
+  // agrupa pessoas (Pacaembu por nome; projetistas por empresa), aceitando nome abreviado
+  const people=[];
+  recs.forEach(x=>{const g=people.find(p=>p.interno===x.interno&&(p.key===x.key||(x.key.length>=4&&p.key.startsWith(x.key))||(p.key.length>=4&&x.key.startsWith(p.key))));
+    if(g){g.list.push(x);if(!g.area&&x.area)g.area=x.area;if(!g.emp&&x.emp)g.emp=x.emp}else people.push({key:x.key,interno:x.interno,nome:x.nome,emp:x.emp,area:x.area,grupo:x.grupo,list:[x]})});
+  people.sort((a,b)=>(a.interno===b.interno?0:a.interno?-1:1)||a.grupo.localeCompare(b.grupo)||String(a.interno?a.nome:a.emp).localeCompare(String(b.interno?b.nome:b.emp),"pt-BR"));
+  const part=[["Nº","Nome","Grupo","Área / Empresa","Questionários respondidos","Último envio","Envios repetidos"]];
+  people.forEach((p,i)=>{const forms=[...new Set(p.list.map(x=>x.r.form))];const reps=p.list.length-forms.length;
+    part.push([i+1,p.nome,p.grupo,p.interno?(p.area||"—"):(p.emp||"—"),forms.map(fnav).join(", "),dt(p.list[0].r.enviadoEm),reps||""])});
+  // por questionário
+  const seen=new Set();const porQ=[["Questionário","Nome","Grupo","Área / Empresa","Enviado em","Situação"]];
+  FORMS.forEach(f=>{recs.filter(x=>x.r.form===f.id).forEach(x=>{const p=people.find(pp=>pp.list.includes(x));const k=f.id+"|"+people.indexOf(p);x._sit=seen.has(k)?"Repetido (vale o mais recente)":"Considerado";seen.add(k)});
+    recs.filter(x=>x.r.form===f.id).slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),"pt-BR")).forEach(x=>{porQ.push([f.nav,x.nome,x.grupo,x.interno?(x.area||"—"):(x.emp||"—"),dt(x.r.enviadoEm),x._sit])})});
+  if(0)FORMS.forEach(f=>{recs.filter(x=>x.r.form===f.id).forEach(x=>{const p=people.find(pp=>pp.list.includes(x));const k=f.id+"|"+people.indexOf(p);
+    const sit=seen.has(k)?"Repetido (vale o mais recente)":"Considerado";seen.add(k);
+    porQ.push([f.nav,x.nome,x.grupo,x.interno?(x.area||"—"):(x.emp||"—"),dt(x.r.enviadoEm),sit])})});
+  // resumo
+  const res=[["Questionário","Pessoas / empresas","Envios recebidos"]];
+  FORMS.forEach(f=>{const n=new Set(people.filter(p=>p.list.some(x=>x.r.form===f.id)).map(p=>p.key)).size;res.push([f.nav,n,recs.filter(x=>x.r.form===f.id).length])});
+  res.push([],["Total de participantes",people.length,RAW.length],["Equipe Pacaembu",people.filter(p=>p.interno).length,""],["Empresas projetistas",people.filter(p=>!p.interno).length,""]);
+  return {part,porQ,res};
+}
+async function participantes(){
+  const {part,porQ,res}=participantesData();
+  const d=new Date(),dd=String(d.getDate()).padStart(2,"0")+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+d.getFullYear();
+  try{
+    const X=await loadXLSX();const wb=X.utils.book_new();
+    const add=(aoa,name,cols)=>{const ws=X.utils.aoa_to_sheet(aoa);ws["!cols"]=cols.map(w=>({wch:w}));if(aoa.length>1)ws["!autofilter"]={ref:X.utils.encode_range({s:{r:0,c:0},e:{r:aoa.length-1,c:aoa[0].length-1}})};X.utils.book_append_sheet(wb,ws,name)};
+    add(part,"Participantes",[5,34,24,30,60,17,15]);
+    add(porQ,"Por questionário",[26,34,24,30,17,28]);
+    add(res,"Resumo",[30,20,18]);
+    X.writeFile(wb,`Lista_participantes_diagnostico_BIM_${dd}.xlsx`);
+  }catch(e){ // sem internet para a biblioteca: CSV que o Excel abre
+    const cell=v=>{v=String(v??"");return /[";\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+    const blob=new Blob(["﻿"+part.map(r=>r.map(cell).join(";")).join("\n")],{type:"text/csv;charset=utf-8"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`Lista_participantes_diagnostico_BIM_${dd}.csv`;document.body.appendChild(a);a.click();a.remove();
+  }
+}
 function csv(){
   const cols=["Data","Questionário","Nome","Área","Empresa"];const qmap=[];
   FORMS.forEach(f=>f.sections.forEach(s=>s.qs.forEach(q=>{qmap.push([f.id,q.id]);cols.push(f.nav+" – "+q.l)})));
@@ -820,9 +868,9 @@ async function load(email,key){
     try{sessionStorage.setItem("adminAuth",JSON.stringify([email,key]))}catch(e){}
     AUTH=[email,key];RAW=j.rows||[];allDocs=toDocs(RAW);render();
     const bar=document.createElement("div");bar.className="actions";
-    bar.innerHTML=`<button class="primary" type="button" id="dl">Baixar respostas (Excel/CSV)</button><button class="ghost" type="button" id="rf">Atualizar</button><button class="ghost" type="button" id="out">Sair</button>`;
+    bar.innerHTML=`<button class="primary" type="button" id="pl">Baixar lista de participantes (Excel)</button><button class="ghost" type="button" id="dl">Baixar respostas (Excel/CSV)</button><button class="ghost" type="button" id="rf">Atualizar</button><button class="ghost" type="button" id="out">Sair</button>`;
     let ab=document.getElementById("adminbar");if(!ab){ab=document.createElement("div");ab.id="adminbar";ab.className="wrap";ab.style.paddingTop="20px";$("main").prepend(ab)}ab.innerHTML="";ab.appendChild(bar);
-    $("#dl").onclick=csv;$("#rf").onclick=()=>load(email,key);$("#out").onclick=()=>{try{sessionStorage.removeItem("adminAuth")}catch(e){};AUTH=null;login()};
+    $("#dl").onclick=csv;$("#pl").onclick=participantes;$("#rf").onclick=()=>load(email,key);$("#out").onclick=()=>{try{sessionStorage.removeItem("adminAuth")}catch(e){};AUTH=null;login()};
   }catch(e){const u=window.APPS_SCRIPT_URL||"(vazio)";const ok=/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(u);
     $("#view").innerHTML=`<div class="notice"><b>Não foi possível carregar as respostas.</b><br>Endereço configurado em config.js: <code style="word-break:break-all">${esc(u)}</code><br>${ok?'O formato do endereço está certo. Clique em <b>Testar conexão</b>: deve abrir uma página com {"ok":false}. Se abrir login do Google ou erro, ajuste a implantação (Quem pode acessar: Qualquer pessoa) e crie uma Nova versão.':'<b>O endereço não está no formato certo.</b> Ele precisa começar com https://script.google.com/macros/s/ e terminar em /exec.'}</div>
     <div class="actions">${ok?`<a class="ghost" style="text-decoration:none;font-family:var(--display);font-weight:700;font-size:14px;border:1px solid var(--line);border-radius:6px;padding:12px 20px;color:var(--fg)" href="${esc(u)}?email=teste&key=teste" target="_blank" rel="noopener">Testar conexão</a>`:''}<button class="primary" type="button" id="relog">Entrar novamente</button></div>`;
