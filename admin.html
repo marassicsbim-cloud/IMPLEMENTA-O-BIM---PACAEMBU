@@ -833,17 +833,25 @@ function participantesData(){
   const res=[["Questionário","Pessoas / empresas","Envios recebidos"]];
   FORMS.forEach(f=>{const n=new Set(people.filter(p=>p.list.some(x=>x.r.form===f.id)).map(p=>p.key)).size;res.push([f.nav,n,recs.filter(x=>x.r.form===f.id).length])});
   res.push([],["Total de participantes",people.length,RAW.length],["Equipe Pacaembu",people.filter(p=>p.interno).length,""],["Empresas projetistas",people.filter(p=>!p.interno).length,""]);
-  return {part,porQ,res};
+  // respostas de cada pessoa, uma aba por questionário (só o envio considerado)
+  const resp=FORMS.map(f=>{const qs=f.sections.flatMap(sec=>sec.qs).filter(q=>!["nome","empresa","area"].includes(q.id));
+    const head=["Nome",f.id.startsWith("projetistas")?"Empresa":"Área","Enviado em",...qs.map(q=>q.l.replace(/\.$/,"")+(q.type==="scale"?" (1 a 5)":""))];
+    const rows=recs.filter(x=>x.r.form===f.id&&x._sit==="Considerado").sort((a,b)=>String(a.nome).localeCompare(String(b.nome),"pt-BR"))
+      .map(x=>{const r=x.r.respostas||{};return [x.nome,f.id.startsWith("projetistas")?(x.emp||"—"):(x.area||"—"),dt(x.r.enviadoEm),...qs.map(q=>{const v=r[q.id];return Array.isArray(v)?v.join(", "):(v??"")})]});
+    return {name:f.nav.slice(0,31),aoa:[head,...rows],ncol:head.length}}).filter(t=>t.aoa.length>1);
+  return {part,porQ,res,resp};
 }
 async function participantes(){
-  const {part,porQ,res}=participantesData();
+  const {part,porQ,res,resp}=participantesData();
   const d=new Date(),dd=String(d.getDate()).padStart(2,"0")+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+d.getFullYear();
   try{
     const X=await loadXLSX();const wb=X.utils.book_new();
     const add=(aoa,name,cols)=>{const ws=X.utils.aoa_to_sheet(aoa);ws["!cols"]=cols.map(w=>({wch:w}));if(aoa.length>1)ws["!autofilter"]={ref:X.utils.encode_range({s:{r:0,c:0},e:{r:aoa.length-1,c:aoa[0].length-1}})};X.utils.book_append_sheet(wb,ws,name)};
     add(part,"Participantes",[5,34,24,30,60,17,15]);
+    if(wb.Workbook===undefined)wb.Workbook={Views:[{}]};
     add(porQ,"Por questionário",[26,34,24,30,17,28]);
     add(res,"Resumo",[30,20,18]);
+    resp.forEach(t=>{add(t.aoa,t.name,[34,30,17,...Array(t.ncol-3).fill(28)]);const ws=wb.Sheets[t.name];ws["!freeze"]={xSplit:1,ySplit:1}});
     X.writeFile(wb,`Lista_participantes_diagnostico_BIM_${dd}.xlsx`);
   }catch(e){ // sem internet para a biblioteca: CSV que o Excel abre
     const cell=v=>{v=String(v??"");return /[";\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
